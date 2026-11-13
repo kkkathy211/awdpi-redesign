@@ -607,10 +607,10 @@ const headStuck = () => { const h = document.querySelector('.site'); return h ? 
   const f = document.querySelector('[data-give]'); if (!f) return;
   const zh = document.documentElement.lang === 'zh-CN';
   const chips = [...f.querySelectorAll('input[name="amount"]')], other = f.querySelector('input[name="other"]');
-  const cur = f.querySelector('select[name="currency"]'), label = f.querySelector('[data-give-label]');
+  const label = f.querySelector('[data-give-label]');
   const err = f.querySelector('[data-give-err]'), note = f.querySelector('[data-give-note]');
   const freq = () => f.querySelector('input[name="freq"]:checked').value;
-  const sym = () => cur.selectedOptions[0].dataset.sym;
+  const sym = () => f.querySelector('input[name="currency"]:checked').dataset.sym;
   const amount = () => {
     const c = chips.find(x => x.checked); if (c) return +c.value;
     const v = parseFloat(other.value.replace(/[^\d.,]/g, '').replace(',', '.'));

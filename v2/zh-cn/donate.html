@@ -47,7 +47,7 @@
           <label><input type="radio" name="freq" value="once" checked><span>单次</span></label>
           <label><input type="radio" name="freq" value="month"><span>每月</span></label>
         </fieldset>
-        <label class="give__cur"><span class="sr">币种</span><select name="currency"><option value="EUR" data-sym="€">欧元 €</option><option value="GBP" data-sym="£">英镑 £</option><option value="USD" data-sym="$">美元 $</option></select></label>
+        <fieldset class="seg seg--cur"><legend class="sr">币种</legend><label title="欧元"><input type="radio" name="currency" value="EUR" data-sym="€" aria-label="欧元" checked><span>€</span></label><label title="英镑"><input type="radio" name="currency" value="GBP" data-sym="£" aria-label="英镑"><span>£</span></label><label title="美元"><input type="radio" name="currency" value="USD" data-sym="$" aria-label="美元"><span>$</span></label></fieldset>
       </div>
       <fieldset class="give__amts"><legend class="lbl">金额</legend>
         <div class="give__grid"><label class="amt"><input type="radio" name="amount" value="25" data-once="25" data-month="5"><span><span data-sym>€</span><span data-n>25</span></span></label><label class="amt"><input type="radio" name="amount" value="50" data-once="50" data-month="10" checked><span><span data-sym>€</span><span data-n>50</span></span></label><label class="amt"><input type="radio" name="amount" value="100" data-once="100" data-month="25"><span><span data-sym>€</span><span data-n>100</span></span></label><label class="amt"><input type="radio" name="amount" value="250" data-once="250" data-month="50"><span><span data-sym>€</span><span data-n>250</span></span></label></div>
