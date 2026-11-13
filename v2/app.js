@@ -600,3 +600,47 @@ const headStuck = () => { const h = document.querySelector('.site'); return h ? 
     boxes.forEach(b => b.addEventListener('change', update));
   });
 })();
+
+/* Donate: the gift card. One-time or monthly swaps the four amounts, the currency swaps the symbol, and the button
+   always says what it would do ("Donate €10 a month"). No payment is connected: submitting shows the prototype note. */
+(() => {
+  const f = document.querySelector('[data-give]'); if (!f) return;
+  const zh = document.documentElement.lang === 'zh-CN';
+  const chips = [...f.querySelectorAll('input[name="amount"]')], other = f.querySelector('input[name="other"]');
+  const cur = f.querySelector('select[name="currency"]'), label = f.querySelector('[data-give-label]');
+  const err = f.querySelector('[data-give-err]'), note = f.querySelector('[data-give-note]');
+  const freq = () => f.querySelector('input[name="freq"]:checked').value;
+  const sym = () => cur.selectedOptions[0].dataset.sym;
+  const amount = () => {
+    const c = chips.find(x => x.checked); if (c) return +c.value;
+    const v = parseFloat(other.value.replace(/[^\d.,]/g, '').replace(',', '.'));
+    return v > 0 ? Math.round(v * 100) / 100 : 0;
+  };
+  const money = n => sym() + n.toLocaleString('en', n % 1 ? { minimumFractionDigits: 2, maximumFractionDigits: 2 } : {});
+  function render() {
+    f.querySelectorAll('span[data-sym]').forEach(s => { s.textContent = sym(); });
+    const n = amount(), month = freq() === 'month';
+    label.textContent = !n ? (zh ? '捐赠' : 'Donate')
+      : zh ? (month ? '每月捐赠 ' : '捐赠 ') + money(n)
+      : 'Donate ' + money(n) + (month ? ' a month' : '');
+    other.parentElement.classList.toggle('is-on', !chips.some(x => x.checked) && n > 0);
+    note.hidden = true;
+  }
+  f.addEventListener('change', e => {
+    if (e.target.name === 'freq') {
+      chips.forEach(c => { c.value = c.dataset[e.target.value]; c.nextElementSibling.querySelector('[data-n]').textContent = (+c.value).toLocaleString('en'); });
+    }
+    if (e.target.name === 'amount') { other.value = ''; err.hidden = true; }
+    render();
+  });
+  other.addEventListener('input', () => {
+    if (other.value.trim()) chips.forEach(c => { c.checked = false; });
+    err.hidden = true; render();
+  });
+  f.addEventListener('submit', e => {
+    e.preventDefault();
+    const n = amount(); err.hidden = !!n; note.hidden = !n;
+    if (!n) other.focus();
+  });
+  render();
+})();
