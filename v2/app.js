@@ -417,32 +417,43 @@ const headStuck = () => { const h = document.querySelector('.site'); return h ? 
   });
 })();
 
-// About, why overseas Asian women: when the block comes into view, the Asian circle shows its sentence, then the
-// Women circle, then the two slide together and the overlap, her, carries both. Each label is a button.
+// About, why overseas Asian women: each time the block comes into view, the Asian circle shows its sentence, then
+// the Women circle, then the two slide together and the overlap, her, carries both. Off screen it resets, so it
+// plays again on the way back. A click on any label brings the circles together and shows that part; pointing only
+// works once they have met, so a cursor resting where the page scrolls past can't stop the story halfway.
 (() => {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   document.querySelectorAll('[data-dw]').forEach(box => {
     const btns = [...box.querySelectorAll('[data-dw-k]')], panes = [...box.querySelectorAll('[data-dw-p]')];
-    let auto = true;
+    const vis = box.querySelector('.dw__v');
+    let timers = [], armed = true;
     const set = k => {
       box.dataset.state = k;
       btns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.dwK === k)));
       panes.forEach(p => p.classList.toggle('is-on', p.dataset.dwP === k));
     };
+    const stop = () => { timers.forEach(clearTimeout); timers = []; };
+    const settled = () => !timers.length && !box.classList.contains('is-apart');
+    const join = () => box.classList.remove('is-apart');
     btns.forEach(b => {
-      const pick = () => { auto = false; if (b.dataset.dwK === 'both') box.classList.remove('is-apart'); set(b.dataset.dwK); };
-      b.addEventListener('click', pick);
-      b.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') pick(); });
+      b.addEventListener('click', () => { stop(); armed = false; join(); set(b.dataset.dwK); });
+      b.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse' && settled()) set(b.dataset.dwK); });
     });
+    if (vis) vis.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse' && settled()) set('both'); });
     if (STILL || reduce || !('IntersectionObserver' in window)) return;
-    box.classList.add('is-apart'); set('a');
-    const io = new IntersectionObserver(([e]) => {
-      if (!e.isIntersecting) return;
-      io.disconnect();
-      setTimeout(() => { if (auto) set('b'); }, 2200);
-      setTimeout(() => { if (auto) { box.classList.remove('is-apart'); set('both'); } }, 4400);
-    }, { threshold: 0.45 });
-    io.observe(box);
+    const apart = () => { stop(); box.classList.add('is-apart'); set('a'); };
+    apart();
+    // starts once the block reaches the middle of the screen
+    new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting || !armed) return;
+      armed = false; apart();
+      timers = [
+        setTimeout(() => set('b'), 2200),
+        setTimeout(() => { timers = []; join(); set('both'); }, 4400),
+      ];
+    }, { rootMargin: '-30% 0px -30% 0px' }).observe(box);
+    // fully off screen: set the circles apart again for the next visit
+    new IntersectionObserver(([e]) => { if (!e.isIntersecting) { armed = true; apart(); } }).observe(box);
   });
 })();
 
