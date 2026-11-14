@@ -1,0 +1,15 @@
+{{- /* Meta description. The legal pages state the legal name and registration number, from data/organisations.toml. */ -}}
+{{- $d := .Description -}}
+{{- $orgs := hugo.Data.organisations.org -}}
+{{- with .Params.entity -}}
+  {{- $e := index (where $orgs "id" .) 0 -}}
+  {{- $d = printf "%s. Legal name: %s; %s: %s." $e.name $e.legalName $e.idLabel (string $e.registrationNumber) -}}
+{{- else -}}
+  {{- if eq .Layout "organisations" -}}
+    {{- $parts := slice -}}
+    {{- range $orgs }}{{ $parts = $parts | append (printf "%s (%s %s)" .name .footerLabel (string .registrationNumber)) }}{{ end -}}
+    {{- $d = printf "Legal information for the AWDPI international network: %s." (delimit $parts ", " " and ") -}}
+  {{- end -}}
+{{- end -}}
+{{- if not $d }}{{ $d = .Summary | plainify | htmlUnescape | truncate 160 }}{{ end -}}
+{{- return $d -}}

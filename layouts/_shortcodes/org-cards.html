@@ -1,0 +1,5 @@
+{{- /* The four organisation cards on the About page. Data: data/organisations.toml */ -}}
+{{- $zh := eq site.Language.Lang "zh-cn" -}}
+{{- range $i, $o := hugo.Data.organisations.org -}}
+<a class="card net__org c-{{ $o.colour }}" href="{{ printf "%s/" $o.id | relURL }}" data-reveal style="transition-delay:{{ mul $i 80 }}ms"><span class="net__top"><span class="flag"><b>{{ $o.code }}</b></span><b>{{ if $zh }}{{ $o.countryZh }}{{ else }}{{ $o.country }}{{ end }}</b></span><span class="net__name">{{ $o.name }}</span><span class="net__id">{{ if $zh }}{{ $o.footerLabelZh }}{{ else }}{{ $o.footerLabel | strings.FirstUpper }}{{ end }} {{ partial "legal/value.html" $o.registrationNumber }}</span><span class="net__go">{{ T "orgsCardGo" }} {{ partial "icon.html" "arrow" }}</span></a>
+{{- end -}}

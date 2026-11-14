@@ -1,0 +1,8 @@
+{{- /* The country list on /donate/. Data: data/donate.toml and data/organisations.toml */ -}}
+{{- $zh := eq site.Language.Lang "zh-cn" -}}
+<ul class="dpick__list">
+{{- range hugo.Data.donate.country }}
+{{- $o := index (where hugo.Data.organisations.org "id" .id) 0 }}
+<li><a class="dpick__c c-{{ $o.colour }}" href="{{ printf "donate/%s/" .id | relLangURL }}" data-country="{{ .id }}"><span class="flag"><b>{{ $o.code }}</b></span><span class="dpick__t"><b>{{ if $zh }}{{ $o.countryZh }}{{ else }}{{ $o.country }}{{ end }}</b><span>{{ $o.name }} · {{ .currency }}<span class="dpick__here"> · {{ T "donateHere" }}</span></span></span>{{ if ne .status "open" }}<span class="dpick__soon">{{ T "donateSoon" }}</span>{{ end }}{{ partial "icon.html" "arrow" }}</a></li>
+{{- end }}
+</ul>

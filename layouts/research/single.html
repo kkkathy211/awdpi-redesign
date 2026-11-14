@@ -1,0 +1,13 @@
+{{- /* One research report: /research/<id>/. Text: content/<lang>/research/<id>.md; the PDF is in static/reports/. */ -}}
+{{ define "main" }}
+{{- $crumbs := partial "legal/crumb.html" (slice (dict "title" (T "researchBack") "href" ("research/" | relLangURL)) (dict "title" .Params.region)) -}}
+{{ partial "legal/hero.html" (dict "title" .Title "crumbs" $crumbs "article" true "colour" .Params.colour "sub" (printf "%s %s" (T "researchPublished") (partial "month.html" .Date))) }}
+<div class="lg__body"><div class="wrap lg__in">
+<div class="card report-dl c-{{ .Params.colour }}"><div class="frame"><img src="{{ .Params.image | relURL }}" alt="" loading="lazy"></div>
+<div><span class="tag">PDF</span>{{ .Content }}</div>
+<a class="btn btn--main" href="{{ .Params.pdf | relURL }}">{{ T "researchDownload" }} {{ partial "icon.html" "download" }}</a></div>
+<nav class="lgn lgn--plain" aria-label="{{ T "researchBack" }}">
+  <a class="link" href="{{ "research/" | relLangURL }}"><span>{{ T "researchAll" }}</span>{{ partial "icon.html" "arrow" }}</a>
+</nav>
+</div></div>
+{{ end }}

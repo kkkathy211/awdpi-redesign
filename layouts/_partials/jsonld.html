@@ -1,0 +1,14 @@
+{{- /* schema.org NGO on each organisation page, with only the fields that have real values. */ -}}
+{{- with .Params.entity -}}
+{{- $e := index (where hugo.Data.organisations.org "id" .) 0 -}}
+{{- $ld := dict "@context" "https://schema.org" "@type" "NGO" "name" $e.name "url" $.Permalink "email" $e.email -}}
+{{- range slice (slice "legalName" "legalName") (slice "address" "registeredAddress") (slice "telephone" "phone") -}}
+  {{- $v := index $e (index . 1) -}}
+  {{- if and $v (ne (string $v) "TBD") }}{{ $ld = merge $ld (dict (index . 0) $v) }}{{ end -}}
+{{- end -}}
+{{- if and $e.registrationNumber (ne (string $e.registrationNumber) "TBD") -}}
+  {{- $ld = merge $ld (dict "identifier" (dict "@type" "PropertyValue" "propertyID" $e.idLabel "value" (string $e.registrationNumber))) -}}
+  {{- if eq $e.id "us" }}{{ $ld = merge $ld (dict "taxID" (string $e.registrationNumber)) }}{{ end -}}
+{{- end }}
+<script type="application/ld+json">{{ $ld | jsonify | safeJS }}</script>
+{{ end -}}

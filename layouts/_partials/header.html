@@ -1,0 +1,11 @@
+<header class="site">
+  <div class="wrap site__bar">
+    <a class="logo" href="{{ site.Home.RelPermalink }}" aria-label="{{ T "homeLabel" }}"><img src="{{ T "logo" | relURL }}" alt="" width="{{ T "logoWidth" }}" height="50"></a>
+    <nav class="nav__links" aria-label="{{ T "navLabel" }}">{{ range site.Menus.main }}<a href="{{ .URL }}"{{ with .Params.class }} class="{{ . }}"{{ end }}{{ if eq $.Params.nav .Identifier }} aria-current="page"{{ end }}>{{ .Name }}</a>{{ end }}</nav>
+    <div class="site__tools">
+      <a class="donate-link" href="{{ "donate/" | relLangURL }}"{{ if eq .Params.nav "donate" }} aria-current="page"{{ end }}>{{ T "donate" }}</a>
+      <nav class="lang" aria-label="{{ T "langLabel" }}">{{ partial "lang-links.html" . }}</nav>
+      <a class="exit" href="https://www.google.com/" data-quick-exit><i><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></i>{{ T "quickExit" }}<span class="exit__tip">{{ T "quickExitTip" | safeHTML }}</span></a>
+    </div>
+  </div>
+</header>

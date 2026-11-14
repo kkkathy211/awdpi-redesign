@@ -1,0 +1,10 @@
+{{- /* A page of running text, such as /privacy/ and /terms/. Text: the page's Markdown file. */ -}}
+{{ define "main" }}
+{{ partial "legal/hero.html" (dict "title" .Title "crumbs" "AWDPI" "lead" .Params.lead) }}
+<div class="lg__body"><div class="wrap lg__in">
+<article class="card lgp">
+{{ .Content }}
+</article>
+{{ with .Params.lastUpdated }}{{ partial "legal/updated.html" . }}{{ end }}
+</div></div>
+{{ end }}

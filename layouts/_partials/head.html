@@ -1,0 +1,20 @@
+{{- $title := .Params.headTitle | default (printf "%s | AWDPI" .Title) -}}
+{{- $desc := partial "description.html" . -}}
+<head>
+{{ if site.Params.preview }}<meta name="robots" content="noindex, nofollow">
+{{ end -}}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ $title }}</title>
+<meta name="description" content="{{ $desc }}">
+<link rel="canonical" href="{{ .Permalink }}">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#ffffff">
+<meta property="og:title" content="{{ $title }}"><meta property="og:description" content="{{ $desc }}"><meta property="og:image" content="{{ site.Params.shareImage | absURL }}">
+{{ range .Translations }}<link rel="alternate" hreflang="{{ .Language.Locale }}" href="{{ .RelPermalink }}">
+{{ end -}}
+<link rel="icon" href="{{ "img/awdpi-favicon.png" | relURL }}"><link rel="apple-touch-icon" href="{{ "img/awdpi-touch.png" | relURL }}">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="{{ site.Language.Params.fonts }}" rel="stylesheet">
+<link rel="stylesheet" href="{{ "css/style.css" | relURL }}">
+{{ block "head" . }}{{ end }}{{ partial "jsonld.html" . }}</head>

@@ -1,0 +1,94 @@
+{{- /*
+  Donation page of one country: /donate/us/ and so on.
+  Settings: data/donate.toml (status, currency, embed code, platform, campaigns, projects);
+  organisation details: data/organisations.toml; "Before you give" text: the page's Markdown file.
+*/ -}}
+{{ define "main" }}
+{{- $zh := eq site.Language.Lang "zh-cn" -}}
+{{- $id := .Params.country -}}
+{{- $all := hugo.Data.donate.country -}}
+{{- $c := index (where $all "id" $id) 0 -}}
+{{- $orgs := hugo.Data.organisations.org -}}
+{{- $o := index (where $orgs "id" $id) 0 -}}
+{{- $name := $c.receivingName | default $o.legalName -}}
+{{- $open := and (eq $c.status "open") $c.embed -}}
+{{- $arrow := partial "icon.html" "arrow" -}}
+<section class="ph ph--donate">
+  <div class="wrap ph-donate">
+    <div class="ph-donate__text">
+      <p class="dcrumb" data-in style="--i:0"><a href="{{ "donate/" | relLangURL }}">{{ T "donateAll" }}</a><span aria-hidden="true">/</span><span class="flag"><b>{{ $o.code }}</b></span></p>
+      <h1 data-in style="--i:0">{{ .Title }}</h1>
+      <p class="ph-lead" data-in style="--i:1">{{ T "donateLead" (dict "Name" (cond (eq (string $name) "TBD") $o.name $name) "Currency" (cond $zh $c.currencyNameZh $c.currencyName)) }}</p>
+    </div>
+    <div class="ph-donate__more" data-in style="--i:3">
+      <dl class="lgf dfacts">
+        <div><dt>{{ T "donateReceiver" }}</dt><dd>{{ partial "legal/value.html" $name }}</dd></div>
+        <div><dt>{{ $o.idLabel }}</dt><dd>{{ partial "legal/value.html" $o.registrationNumber }}</dd></div>
+        <div><dt>{{ T "donateCurrency" }}</dt><dd>{{ $c.currency }}</dd></div>
+      </dl>
+      <p class="ph-donate__reg">{{ T "donateElsewhere" }} {{ range $i, $x := where $all "id" "ne" $id }}{{ if $i }} · {{ end }}{{ $xo := index (where $orgs "id" $x.id) 0 }}<a href="{{ printf "donate/%s/" $x.id | relLangURL }}">{{ if $zh }}{{ $xo.countryZh }}{{ else }}{{ $xo.country }}{{ end }}</a>{{ end }}</p>
+    </div>
+    <div class="give{{ if $open }} give--embed{{ end }}" data-in style="--i:2">
+      {{- if $open }}
+      <h2 class="give__h">{{ T "donateYour" }}</h2>
+      {{ $c.embed | safeHTML }}
+      {{- else }}
+      <span class="tag dsoon">{{ T "donateSoon" }}</span>
+      <h2 class="give__h">{{ T "donateSoonH" }}</h2>
+      <p class="give__p">{{ T "donateSoonP" (dict "Email" $o.email) }}</p>
+      <a class="btn btn--main give__go" href="mailto:{{ $o.email }}">{{ T "donateWrite" }} {{ $arrow }}</a>
+      {{- end }}
+      <p class="give__alt">{{ T "donateOther" }} <a href="mailto:{{ $o.email }}">{{ $o.email }}</a></p>
+    </div>
+  </div>
+</section>
+
+<section class="section section--white lg"><div class="wrap lg__in">
+<div class="head head--left" data-reveal><h2>{{ T "donateInfo" }}</h2></div>
+<article class="card lgp">
+{{ .Content }}
+</article>
+{{- if $zh }}{{ range where .Translations "Lang" "en" }}
+<details class="card lgp dorig" lang="en"><summary>{{ T "donateOriginal" }}</summary>
+{{ .Content }}
+</details>
+{{- end }}{{ end }}
+</div></section>
+
+{{- with $c.platform }}
+<section class="section"><div class="wrap">
+<div class="head" data-reveal><h2>{{ T "donateCampaigns" }}</h2><p>{{ T "donateCampaignsP" (dict "Platform" .) }}</p></div>
+<div class="gways dcards" data-reveal>
+  {{- range $i, $x := $c.campaigns }}
+  <a class="gway {{ index (slice "c-orange" "c-yellow" "c-red" "c-pink") (mod $i 4) }}" href="{{ $x.url }}" target="_blank" rel="noopener"><i>{{ partial "icon.html" "heart" }}</i><h3>{{ if $zh }}{{ $x.titleZh | default $x.title }}{{ else }}{{ $x.title }}{{ end }}</h3><p>{{ if $zh }}{{ $x.textZh | default $x.text }}{{ else }}{{ $x.text }}{{ end }}</p><span class="gway__go"><span>{{ T "donateCampaignGo" (dict "Platform" $c.platform) }}</span>{{ $arrow }}</span></a>
+  {{- else }}
+  <div class="gway gway--soon c-orange"><i>{{ partial "icon.html" "heart" }}</i><div><h3>{{ . }}</h3><p>{{ T "donateCampaignSoon" (dict "Platform" .) }}</p></div><span class="tag dsoon">{{ T "donateSoon" }}</span></div>
+  {{- end }}
+</div>
+</div></section>
+{{- end }}
+
+{{- with $c.projects }}
+<section class="section section--white"><div class="wrap">
+<div class="head" data-reveal><h2>{{ T "donateProjects" }}</h2></div>
+<div class="gways dcards" data-reveal>
+  {{- range $i, $x := . }}
+  {{- $cls := index (slice "c-orange" "c-yellow" "c-red" "c-pink") (mod $i 4) }}
+  {{- if $x.url }}<a class="gway {{ $cls }}" href="{{ $x.url }}">{{ else }}<div class="gway {{ $cls }}">{{ end -}}
+  <h3>{{ if $zh }}{{ $x.titleZh | default $x.title }}{{ else }}{{ $x.title }}{{ end }}</h3><p>{{ if $zh }}{{ $x.textZh | default $x.text }}{{ else }}{{ $x.text }}{{ end }}</p>
+  {{- if $x.url }}<span class="gway__go"><span>{{ T "donateMore" }}</span>{{ $arrow }}</span></a>{{ else }}</div>{{ end }}
+  {{- end }}
+</div>
+</div></section>
+{{- end }}
+
+<section class="section--tight lg"><div class="wrap lg__in">
+<nav class="lgn" aria-label="{{ T "donateElsewhereH" }}">
+  <h2 class="lgn__h">{{ T "donateElsewhereH" }}</h2>
+  <ul class="lgn__list">
+    {{- range where $all "id" "ne" $id }}{{ $xo := index (where $orgs "id" .id) 0 }}<li><a class="card lgn__org c-{{ $xo.colour }}" href="{{ printf "donate/%s/" .id | relLangURL }}"><span class="flag"><b>{{ $xo.code }}</b></span><span><b>{{ if $zh }}{{ $xo.countryZh }}{{ else }}{{ $xo.country }}{{ end }}</b><span>{{ .currency }}{{ if ne .status "open" }} · {{ T "donateSoon" }}{{ end }}</span></span><span class="lgn__go">{{ $arrow }}</span></a></li>{{ end -}}
+  </ul>
+  <a class="link" href="{{ "donate/" | relLangURL }}"><span>{{ T "donateAll" }}</span>{{ $arrow }}</a>
+</nav>
+</div></section>
+{{ end }}

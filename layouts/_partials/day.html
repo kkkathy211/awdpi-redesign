@@ -1,0 +1,2 @@
+{{- /* "7 March 2026" in English, "2026年3月7日" in Chinese. Context: a date. */ -}}
+{{- if eq site.Language.Lang "zh-cn" }}{{ printf "%d年%d月%d日" .Year (int .Month) .Day }}{{ else }}{{ .Format "2 January 2006" }}{{ end -}}

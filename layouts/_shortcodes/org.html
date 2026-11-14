@@ -1,0 +1,3 @@
+{{- /* One value from data/organisations.toml, e.g. {{< org uk legalName >}} */ -}}
+{{- $e := index (where hugo.Data.organisations.org "id" (.Get 0)) 0 -}}
+{{- index $e (.Get 1) -}}

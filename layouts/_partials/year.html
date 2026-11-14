@@ -1,0 +1,2 @@
+{{- /* A year heading on /stories/all/; articles without a date are grouped under year 1. */ -}}
+{{- if eq . "0001" }}{{ T "undated" }}{{ else }}{{ . }}{{ end -}}
