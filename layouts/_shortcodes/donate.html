@@ -1,0 +1,3 @@
+{{- /* One value from data/donate.toml, e.g. {{< donate us receivingName >}} */ -}}
+{{- $c := index (where hugo.Data.donate.country "id" (.Get 0)) 0 -}}
+{{- index $c (.Get 1) -}}

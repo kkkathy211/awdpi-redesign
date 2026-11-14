@@ -1,0 +1,145 @@
+# 四个 AWDPI 主体的法律信息
+#
+# 网站从这个文件生成：/organisations/、/uk/、/be/、/us/、/au/ 五个法律信息页，
+# 隐私声明页里的名称、地址和编号（content/en/*/privacy.md 里的 {{< org uk legalName >}}），
+# 每个页面页脚的法律信息一行，以及关于页上的四张主体卡片。
+# 改完后运行 hugo server 预览。
+
+# 填写规则（各主体当地管理员）：
+# - 所有字段从登记机关的记录里逐字复制，标点、大小写和缩写保持原样，不要翻译或改写。
+# - 还没有的数据写 "TBD"，页面上显示为 TBD。
+# - 链接（registerURL、statutesURL）填完整的 https:// 地址。
+# - privacyURL 填站内路径，例如 "/uk/privacy/"；隐私声明正文在 content/en/<id>/privacy.md。
+# - 改完后把 lastUpdated 改成当天日期，格式 "YYYY-MM-DD"。
+# - 这个文件和页面都是公开的：只放公开信息。不放管理员邮箱、银行账号、内部电话、
+#   私人邮箱或手机号、个案信息，也不放未经本人同意的姓名。
+#
+# 下面的顺序就是页脚和 /organisations 的显示顺序。
+# code 是页面上的国家代码，colour 是卡片颜色（orange / yellow / red / pink，和首页地图一致）。
+
+[[org]]
+id = "uk"
+code = "UK"
+colour = "orange"
+name = "AWDPI United Kingdom"
+country = "United Kingdom"
+countryZh = "英国"
+# 以下取自登记证书和 Charity Commission 登记记录（2026-11-14 核对）
+legalName = "ASIAN WOMEN DEVELOPMENT PLAN INTERNATIONAL (UK)"
+jurisdiction = "England and Wales"
+# 登记册上的 Organisation type 是 CIO；CIO 没有公司号，所以不填 companyNumber
+organisationType = "Charitable incorporated organisation (CIO)"
+regulator = "Charity Commission for England and Wales"
+workingName = "AVOICE"          # 登记册上的 Other names（Working name）
+idLabel = "Charity number"
+footerLabel = "registered charity no."
+footerLabelZh = "注册慈善机构编号"
+registrationNumber = "1204406"
+# 地址按登记册逐字照抄（含 "Storey's way" 小写和 "Cambrigeshire" 拼写）；登记册改正后这里同步改
+registeredAddress = "Churchill College, Storey's way, CAMBRIDGE, Cambrigeshire, CB3 0DS"
+registerURL = "https://register-of-charities.charitycommission.gov.uk/en/charity-search/-/charity-details/5203820"
+email = "uk@awdpi.org"
+phone = "+44 7536 937036"       # 和登记册上的电话一致
+# 简介请英国管理员确认
+about = """\
+  AWDPI United Kingdom supports Asian women in England and Wales who are affected by domestic \
+  violence, gender-based violence or discrimination. It runs a relief and referral system that \
+  connects women with help, builds a community where Asian women can share, learn and support each \
+  other, and supports their career development. It also raises awareness of the challenges overseas \
+  Asian women face through research and public education.\
+  """
+hostsSecretariat = true
+donations = ""                  # 登记册显示 Not recognised by HMRC for gift aid，所以不显示捐款一栏
+privacyURL = "/uk/privacy/"
+lastUpdated = "2026-11-14"
+
+[[org]]
+id = "be"
+code = "BE"
+colour = "yellow"
+name = "AWDPI Belgium"
+country = "Belgium"
+countryZh = "比利时"
+# 以下取自 KBO/BCE 法文版记录（2026-11-13 核对）
+legalName = "Asian Women Development Plan International"
+legalForm = "Association internationale sans but lucratif (AISBL)"
+legalFormShort = "AISBL"        # 用在 "an independent international non-profit association (AISBL)" 这句
+# 法律形式的英文说明；法文原文（legalForm）保持不变
+legalFormEnglish = "international non-profit association under Belgian law"
+idLabel = "Enterprise number"
+footerLabel = "enterprise no."
+footerLabelZh = "企业编号"
+registrationNumber = "1011.855.795"
+rpm = "RPM Bruxelles"           # 法人登记册 + 法院所在地
+registeredAddress = "Chée de Roodebeek 206, 1200 Woluwe-Saint-Lambert"
+statutes = "2024-07-25 / 0418733"   # 比利时官方公报附录（Moniteur belge）的公布编号
+statutesURL = "https://www.ejustice.just.fgov.be/tsv_pdf/2024/07/25/24418733.pdf"
+registerURL = "https://kbopub.economie.fgov.be/kbopub/toonondernemingps.html?ondernemingsnummer=1011855795&lang=fr"
+email = "be@awdpi.org"
+phone = "+32 492096473"
+# 简介请比利时管理员确认
+about = """\
+  AWDPI's work began in Belgium, where the Avoice programme was launched in 2020 to support \
+  overseas Chinese women affected by domestic violence. AWDPI Belgium supports Asian women living \
+  in Belgium who face domestic violence, gender-based violence or discrimination, with \
+  multilingual help, legal information, psychological support and referrals to local services. \
+  It also works with local organisations and volunteers to raise awareness of gender-based \
+  violence and to build community support for Asian women.\
+  """
+privacyURL = "/be/privacy/"
+lastUpdated = "2026-11-13"
+
+[[org]]
+id = "us"
+code = "US"
+colour = "red"
+name = "AWDPI United States"
+country = "United States"
+countryZh = "美国"
+# 按 IRS 认定函（2023-09-08，501(c)(3)）逐字填写
+legalName = "ASIAN WOMEN DEVELOPMENT PLAN INTERNATIONAL US INC"
+state = "California"
+idLabel = "EIN"
+footerLabel = "EIN"
+footerLabelZh = "EIN"
+registrationNumber = "93-2511417"
+# 按 IRS Tax Exempt Organization Search 里的邮寄地址逐字填写
+registeredAddress = "1060 Lincoln Ave Suite 20 1127, San Jose, CA 95125"
+# IRS Tax Exempt Organization Search 里的认定函 PDF；页面上这一行的标题是 "IRS determination letter"
+registerURL = "https://apps.irs.gov/pub/epostcard/dl/FinalLetter_93-2511417_ASIANWOMENDEVELOPMENTPLANINTERNATIONALUSINC_08252023_00.pdf"
+email = "us@awdpi.org"
+phone = "+1 404 310 6818"
+# 简介请美国管理员确认
+about = """\
+  AWDPI United States supports Asian women living in the United States who are affected by \
+  domestic violence, gender-based violence or discrimination. It offers multilingual help, legal \
+  information, emotional support and referrals to local shelters, legal services and other support. \
+  It also raises awareness of the challenges Asian American women face, drawing on AWDPI's research \
+  on domestic violence against Chinese American women and its Chinese-language guide to US \
+  domestic violence law.\
+  """
+privacyURL = "/us/privacy/"
+lastUpdated = "2026-11-14"
+
+[[org]]
+id = "au"
+code = "AU"
+colour = "orange"
+name = "AWDPI Australia"
+country = "Australia"
+countryZh = "澳大利亚"
+legalName = "TBD"               # 与 ACNC Charity Register 一字不差
+legalForm = "TBD"               # Incorporated association / company limited by guarantee
+idLabel = "ABN"
+footerLabel = "ABN"
+footerLabelZh = "ABN"
+registrationNumber = "TBD"      # ABN，格式 12 345 678 901
+dgrStatus = "TBD"               # Endorsed as a Deductible Gift Recipient / Not endorsed
+registeredAddress = "TBD"       # 与 ACNC 登记一致
+registerURL = "TBD"             # ACNC Charity Register 上本主体的记录页
+email = "au@awdpi.org"
+phone = "TBD"                   # +61 ...
+about = "TBD"
+donations = "TBD"               # 有 DGR 认定：Donations of $2 or more are tax-deductible in Australia.  没有的话改成 ""
+privacyURL = "TBD"
+lastUpdated = "2026-11-13"

@@ -1,0 +1,19 @@
+{{- /* All articles, by year: /stories/all/. Lists every article in this language. */ -}}
+{{ define "main" }}
+{{- $zh := eq site.Language.Lang "zh-cn" -}}
+{{- $groups := .CurrentSection.RegularPages.GroupByDate "2006" -}}
+{{- $crumbs := partial "legal/crumb.html" (slice (dict "title" (T "storiesBack") "href" ("stories/" | relLangURL)) (dict "title" .Title)) -}}
+{{ partial "legal/hero.html" (dict "title" .Title "crumbs" $crumbs "lead" (T "storiesAllLead")) }}
+<div class="lg__body"><div class="wrap lg__in">
+<nav class="arc__years" aria-label="{{ T "storiesYear" }}">{{ range $groups }}<a class="arc__year" href="#y{{ .Key }}">{{ partial "year.html" .Key }} <em>{{ len .Pages }}</em></a>{{ end }}</nav>
+{{- range $groups }}
+<section class="card lgb arc" id="y{{ .Key }}" aria-labelledby="y{{ .Key }}-h"><h2 id="y{{ .Key }}-h">{{ partial "year.html" .Key }}</h2>
+<ul class="arc__list">
+  {{- range .Pages }}
+  <li><a class="arc__item" href="{{ .RelPermalink }}"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ if .Date.IsZero }}–{{ else if $zh }}{{ printf "%d月%d日" (int .Date.Month) .Date.Day }}{{ else }}{{ .Date.Format "2 Jan" }}{{ end }}</time><span{{ if findRE `\p{Han}` .Title 1 }} lang="zh-CN"{{ end }}>{{ .Title }}</span></a></li>
+  {{- end }}
+</ul>
+</section>
+{{- end }}
+</div></div>
+{{ end }}

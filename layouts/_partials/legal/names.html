@@ -1,0 +1,6 @@
+{{- /* Linked organisation names joined as "A, B and C". Context: a list of organisations. */ -}}
+{{- $n := len . -}}
+{{- range $i, $o := . -}}
+{{- if gt $i 0 }}{{ if eq $i (sub $n 1) }} and {{ else }}, {{ end }}{{ end -}}
+<a href="{{ printf "%s/" $o.id | relURL }}">{{ $o.name }}</a>
+{{- end -}}

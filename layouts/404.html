@@ -1,0 +1,10 @@
+{{ define "main" }}
+{{ partial "legal/hero.html" (dict "title" (T "notFound") "crumbs" "404" "lead" (T "notFoundLead")) }}
+<div class="lg__body"><div class="wrap lg__in">
+<nav class="lgn lgn--plain" aria-label="{{ T "notFound" }}">
+  <a class="link" href="{{ site.Home.RelPermalink }}"><span>{{ T "notFoundHome" }}</span>{{ partial "icon.html" "arrow" }}</a>
+  <a class="link" href="{{ "stories/all/" | relLangURL }}"><span>{{ T "storiesAll" }}</span>{{ partial "icon.html" "arrow" }}</a>
+  <a class="link" href="{{ "get-help/" | relLangURL }}"><span>{{ T "footHelpNow" }}</span>{{ partial "icon.html" "arrow" }}</a>
+</nav>
+</div></div>
+{{ end }}

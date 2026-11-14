@@ -1,0 +1,21 @@
+{{- /* /organisations/: the four organisations, each linking to its own page. Data: data/organisations.toml */ -}}
+{{ define "main" }}
+{{- $orgs := hugo.Data.organisations.org -}}
+{{- $last := "" -}}
+{{- range $orgs }}{{ if gt .lastUpdated $last }}{{ $last = .lastUpdated }}{{ end }}{{ end -}}
+{{ partial "legal/hero.html" (dict "title" "AWDPI organisations" "crumbs" "Legal information" "wide" true
+    "lead" "AWDPI is an international network of independently registered non-profit organisations. Each organisation's page gives its legal name, registration number, registered address and contact details.") }}
+<div class="lg__body"><div class="wrap lg__in lg__in--wide">
+<ul class="lgo">
+  {{- range $orgs }}
+  <li class="card lgo__card c-{{ .colour }}">
+    <p class="lgo__top"><span class="flag"><b>{{ .code }}</b></span><span>{{ .country }}</span></p>
+    <h2><a href="{{ printf "%s/" .id | relURL }}">{{ .name }}</a></h2>
+    <dl class="lgf"><div><dt>Legal name</dt><dd>{{ partial "legal/value.html" .legalName }}</dd></div><div><dt>{{ .idLabel }}</dt><dd>{{ partial "legal/value.html" .registrationNumber }}</dd></div></dl>
+    <a class="link" href="{{ printf "%s/" .id | relURL }}"><span>Legal information</span>{{ partial "icon.html" "arrow" }}</a>
+  </li>
+  {{- end }}
+</ul>
+{{ partial "legal/updated.html" $last }}
+</div></div>
+{{ end }}

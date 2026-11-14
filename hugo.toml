@@ -1,0 +1,271 @@
+# AWDPI website. Build with `hugo`, preview with `hugo server`. See README.md.
+
+baseURL = "https://awdpi.org/"
+title = "AWDPI"
+defaultContentLanguage = "en"
+defaultContentLanguageInSubdir = false
+# Links in the output are written relative to each page, so the same build also works from a sub-path
+# (for example a GitHub Pages preview at https://<user>.github.io/<repo>/).
+# Keep baseURL at the site root and do not pass --baseURL with a sub-path: relativeURLs would then add it twice.
+relativeURLs = true
+enableRobotsTXT = true
+disableHugoGeneratorInject = true
+# Keep capitals in paths, such as /reports/2025_AWDPI_Five-Year_Impact_Report.pdf
+disablePathToLower = true
+disableKinds = ["taxonomy", "term", "rss"]
+
+[params]
+  # While the site is a preview: every page carries "noindex" and robots.txt blocks crawlers.
+  # Set to false when the site goes live at awdpi.org.
+  preview = true
+  # Shown when a page is shared on social media.
+  shareImage = "/share.jpg"
+  # The public address, shown as text on the legal pages (links themselves stay relative).
+  address = "https://awdpi.org/"
+
+[security]
+  # Pages are written as HTML files (content/**/*.html); Hugo blocks that by default.
+  allowContent = [".*"]
+
+[markup.goldmark.renderer]
+  unsafe = true
+[markup.goldmark.extensions.typographer]
+  # keep straight quotes, as typed
+  disable = true
+
+[sitemap]
+  changeFreq = ""
+  priority = -1
+
+# ---------------------------------------------------------------- languages
+
+[languages.en]
+  weight = 1
+  locale = "en"
+  label = "EN"
+  [languages.en.params]
+    fonts = "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap"
+
+  [[languages.en.menus.main]]
+    identifier = "home"
+    name = "Home"
+    pageRef = "/"
+    weight = 1
+  [[languages.en.menus.main]]
+    identifier = "about"
+    name = "About"
+    pageRef = "/about"
+    weight = 2
+  [[languages.en.menus.main]]
+    identifier = "focus-areas"
+    name = "Focus Areas"
+    pageRef = "/focus-areas"
+    weight = 3
+  [[languages.en.menus.main]]
+    identifier = "avoice"
+    name = "Avoice"
+    pageRef = "/avoice"
+    weight = 4
+  [[languages.en.menus.main]]
+    identifier = "research"
+    name = "Research"
+    pageRef = "/research"
+    weight = 5
+  [[languages.en.menus.main]]
+    identifier = "stories"
+    name = "Stories"
+    pageRef = "/stories"
+    weight = 6
+  [[languages.en.menus.main]]
+    identifier = "get-help"
+    name = "Get Help"
+    pageRef = "/get-help"
+    weight = 7
+    [languages.en.menus.main.params]
+      class = "nav__help"
+  [[languages.en.menus.main]]
+    identifier = "support-us"
+    name = "Support Us"
+    pageRef = "/support-us"
+    weight = 8
+
+  [[languages.en.menus.footer_who]]
+    name = "About AWDPI"
+    pageRef = "/about"
+    weight = 1
+  [[languages.en.menus.footer_who]]
+    name = "Focus areas"
+    pageRef = "/focus-areas"
+    weight = 2
+  [[languages.en.menus.footer_who]]
+    name = "Avoice program"
+    pageRef = "/avoice"
+    weight = 3
+  [[languages.en.menus.footer_who]]
+    name = "Research"
+    pageRef = "/research"
+    weight = 4
+
+  [[languages.en.menus.footer_part]]
+    name = "News & stories"
+    pageRef = "/stories"
+    weight = 1
+  [[languages.en.menus.footer_part]]
+    name = "Support us"
+    pageRef = "/support-us"
+    weight = 2
+  [[languages.en.menus.footer_part]]
+    name = "Donate"
+    pageRef = "/donate"
+    weight = 3
+  [[languages.en.menus.footer_part]]
+    name = "2025 Impact Report"
+    url = "/reports/2025_AWDPI_Five-Year_Impact_Report.pdf"
+    weight = 4
+  [[languages.en.menus.footer_part]]
+    name = "contact@awdpi.org"
+    url = "mailto:contact@awdpi.org"
+    weight = 5
+
+  [[languages.en.menus.footer_help]]
+    name = "Talk to us on WeChat"
+    url = "/get-help/#wechat"
+    weight = 1
+  [[languages.en.menus.footer_help]]
+    name = "Hotlines by country"
+    url = "/get-help/#finder"
+    weight = 2
+  [[languages.en.menus.footer_help]]
+    name = "Legal handbooks"
+    url = "/get-help/#handbooks"
+    weight = 3
+  [[languages.en.menus.footer_help]]
+    name = "Stay safe online"
+    url = "/get-help/#safety"
+    weight = 4
+
+[languages.zh-cn]
+  weight = 2
+  locale = "zh-CN"
+  label = "中文"
+  [languages.zh-cn.params]
+    fonts = "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Noto+Sans+SC:wght@500;700;900&family=Noto+Serif+SC:wght@600&display=swap"
+
+  [[languages.zh-cn.menus.main]]
+    identifier = "home"
+    name = "首页"
+    pageRef = "/"
+    weight = 1
+  [[languages.zh-cn.menus.main]]
+    identifier = "about"
+    name = "关于我们"
+    pageRef = "/about"
+    weight = 2
+  [[languages.zh-cn.menus.main]]
+    identifier = "focus-areas"
+    name = "项目领域"
+    pageRef = "/focus-areas"
+    weight = 3
+  [[languages.zh-cn.menus.main]]
+    identifier = "avoice"
+    name = "海外华人女性保护"
+    pageRef = "/avoice"
+    weight = 4
+  [[languages.zh-cn.menus.main]]
+    identifier = "research"
+    name = "学术研究"
+    pageRef = "/research"
+    weight = 5
+  [[languages.zh-cn.menus.main]]
+    identifier = "stories"
+    name = "故事"
+    pageRef = "/stories"
+    weight = 6
+  [[languages.zh-cn.menus.main]]
+    identifier = "get-help"
+    name = "救助支持"
+    pageRef = "/get-help"
+    weight = 7
+    [languages.zh-cn.menus.main.params]
+      class = "nav__help"
+  [[languages.zh-cn.menus.main]]
+    identifier = "support-us"
+    name = "支持我们"
+    pageRef = "/support-us"
+    weight = 8
+
+  [[languages.zh-cn.menus.footer_who]]
+    name = "关于 AWDPI"
+    pageRef = "/about"
+    weight = 1
+  [[languages.zh-cn.menus.footer_who]]
+    name = "项目领域"
+    pageRef = "/focus-areas"
+    weight = 2
+  [[languages.zh-cn.menus.footer_who]]
+    name = "海外华人女性保护项目"
+    pageRef = "/avoice"
+    weight = 3
+  [[languages.zh-cn.menus.footer_who]]
+    name = "学术研究"
+    pageRef = "/research"
+    weight = 4
+
+  [[languages.zh-cn.menus.footer_part]]
+    name = "新闻与故事"
+    pageRef = "/stories"
+    weight = 1
+  [[languages.zh-cn.menus.footer_part]]
+    name = "支持我们"
+    pageRef = "/support-us"
+    weight = 2
+  [[languages.zh-cn.menus.footer_part]]
+    name = "捐赠"
+    pageRef = "/donate"
+    weight = 3
+  [[languages.zh-cn.menus.footer_part]]
+    name = "2025年影响力报告"
+    url = "/reports/2025_AWDPI_Five-Year_Impact_Report.pdf"
+    weight = 4
+  [[languages.zh-cn.menus.footer_part]]
+    name = "contact@awdpi.org"
+    url = "mailto:contact@awdpi.org"
+    weight = 5
+
+  [[languages.zh-cn.menus.footer_help]]
+    name = "微信联系我们"
+    url = "/zh-cn/get-help/#wechat"
+    weight = 1
+  [[languages.zh-cn.menus.footer_help]]
+    name = "各国求助热线"
+    url = "/zh-cn/get-help/#finder"
+    weight = 2
+  [[languages.zh-cn.menus.footer_help]]
+    name = "普法手册"
+    url = "/zh-cn/get-help/#handbooks"
+    weight = 3
+  [[languages.zh-cn.menus.footer_help]]
+    name = "安全浏览提示"
+    url = "/zh-cn/get-help/#safety"
+    weight = 4
+
+# ---------------------------------------------------------------- content folders
+
+# content/en and content/zh-cn hold each language's pages.
+# content/stories holds the articles (written in Chinese); every article appears in both languages,
+# at /stories/<name>/ and /zh-cn/stories/<name>/, and its images are in static/media/stories/.
+[[module.mounts]]
+  source = "content/en"
+  target = "content"
+  [module.mounts.sites.matrix]
+    languages = ["en"]
+[[module.mounts]]
+  source = "content/zh-cn"
+  target = "content"
+  [module.mounts.sites.matrix]
+    languages = ["zh-cn"]
+[[module.mounts]]
+  source = "content/stories"
+  target = "content/stories"
+  [module.mounts.sites.matrix]
+    languages = ["en", "zh-cn"]

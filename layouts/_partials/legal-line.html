@@ -1,0 +1,13 @@
+{{- /* Legal line at the bottom of every page. Data: data/organisations.toml */ -}}
+{{- $orgs := hugo.Data.organisations.org -}}
+{{- $n := len $orgs -}}
+{{- $zh := eq site.Language.Lang "zh-cn" -}}
+<p class="foot__orgs">{{ T "orgsIntro" }}
+{{- range $i, $o := $orgs -}}
+  {{- if gt $i 0 -}}
+    {{- if eq $i (sub $n 1) }}{{ if $zh }}和{{ else }} and {{ end }}{{ else }}{{ if $zh }}、{{ else }}, {{ end }}{{ end -}}
+  {{- end -}}
+  <a href="{{ printf "%s/" $o.id | relURL }}">{{ $o.name }}</a>
+  {{- if $zh }}（{{ $o.footerLabelZh }} {{ partial "legal/value.html" $o.registrationNumber }}）{{ else }} ({{ $o.footerLabel }} {{ partial "legal/value.html" $o.registrationNumber }}){{ end -}}
+{{- end -}}
+{{ if $zh }}。{{ else }}.{{ end }}<br>{{ T "orgsLegal" }}<a href="{{ "organisations/" | relURL }}">awdpi.org/organisations</a></p>

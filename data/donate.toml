@@ -1,0 +1,68 @@
+# 捐赠页的设置：/donate/（选择国家）和 /donate/us/、/donate/uk/、/donate/be/、/donate/au/
+#
+# 每个国家一段，顺序就是选择国家页上的顺序。机构名称、编号、邮箱来自 organisations.toml（同一个 id）。
+# 页面上的"捐赠须知"文字在 content/en/donate/<id>.md 和 content/zh-cn/donate/<id>.md，由各主体提供合规写法。
+#
+# status：
+#   "soon" = 即将开放：只显示"在线捐赠即将开放"和本国联系邮箱，不加载任何第三方代码
+#   "open" = 已开通：在捐赠卡片里显示 embed 里的嵌入代码
+#
+# 开通（改成 "open"）之前要做的事：
+# 1. 在捐赠工具后台以本国机构名义完成认证，收据上显示的名称和下面的 receivingName 一致
+# 2. 把工具提供的嵌入代码原样粘贴到 embed
+# 3. 更新本国隐私声明（content/en/<id>/privacy.md）和 /privacy/ 页的"Our website"一节，
+#    加上捐赠工具和支付服务商，并核实"不使用分析或广告 Cookie"这句是否仍然成立
+# 4. 由本国主体确认 content/<语言>/donate/<id>.md 里的合规写法
+#
+# campaigns：外部公益平台上的专项募款（例如 GoFundMe），每个活动一段：
+#   [[country.campaigns]]
+#     title = "活动名称（英文）"
+#     titleZh = "活动名称（中文）"
+#     text = "一两句说明（英文）"
+#     textZh = "一两句说明（中文）"
+#     url = "https://www.gofundme.com/..."
+#
+# projects：本国的项目，在"您的捐赠支持的项目"一栏显示，字段和 campaigns 相同（url 可选）。
+
+[[country]]
+id = "us"
+status = "soon"
+currency = "USD"
+currencyName = "US dollars"
+currencyNameZh = "美元"
+# 收据和捐赠工具后台上显示的名称，两处必须一致。
+# 合规方案按这个写法；法律信息页（/us/）按 IRS 认定函写作 ASIAN WOMEN DEVELOPMENT PLAN INTERNATIONAL US INC。
+receivingName = "Asian Women Development Plan International US, Inc."
+tool = "Givebutter"
+embed = ""
+platform = "GoFundMe"
+
+[[country]]
+id = "uk"
+status = "soon"
+currency = "GBP"
+currencyName = "pounds"
+currencyNameZh = "英镑"
+tool = ""
+embed = ""
+platform = ""
+
+[[country]]
+id = "be"
+status = "soon"
+currency = "EUR"
+currencyName = "euros"
+currencyNameZh = "欧元"
+tool = ""
+embed = ""
+platform = ""
+
+[[country]]
+id = "au"
+status = "soon"
+currency = "AUD"
+currencyName = "Australian dollars"
+currencyNameZh = "澳元"
+tool = ""
+embed = ""
+platform = ""
