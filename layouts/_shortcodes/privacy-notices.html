@@ -1,0 +1,6 @@
+{{- /* List of the organisations' privacy notices, from data/organisations.toml */ -}}
+<ul>
+{{- range hugo.Data.organisations.org }}
+<li>{{ if and .privacyURL (ne .privacyURL "TBD") }}<a href="{{ .privacyURL | relURL }}">{{ .name }}</a>{{ else }}{{ .name }}: <span class="tbd">TBD</span>{{ end }}</li>
+{{- end }}
+</ul>

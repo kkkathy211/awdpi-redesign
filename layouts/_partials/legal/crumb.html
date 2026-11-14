@@ -1,0 +1,5 @@
+{{- /* Breadcrumb trail. Context: slice of (dict "title" "href"); the last item has no link. */ -}}
+{{- range $i, $c := . -}}
+{{- if $i }}<span aria-hidden="true">/</span>{{ end -}}
+{{- with $c.href }}<a href="{{ . }}">{{ $c.title }}</a>{{ else }}{{ $c.title }}{{ end -}}
+{{- end -}}

@@ -1,0 +1,16 @@
+{{- /* Privacy notice of one organisation: /uk/privacy/ and so on. Text: content/en/<id>/privacy.md */ -}}
+{{ define "main" }}
+{{- $e := index (where hugo.Data.organisations.org "id" .Params.org) 0 -}}
+{{- $crumbs := partial "legal/crumb.html" (slice (dict "title" "AWDPI organisations" "href" ("organisations/" | relURL)) (dict "title" $e.name "href" (printf "%s/" $e.id | relURL))) -}}
+{{ partial "legal/hero.html" (dict "title" .Title "org" $e "crumbs" $crumbs) }}
+<div class="lg__body"><div class="wrap lg__in">
+<article class="card lgp">
+{{ .Content }}
+</article>
+{{ partial "legal/updated.html" .Params.lastUpdated }}
+<nav class="lgn lgn--plain" aria-label="{{ $e.name }}">
+  <a class="link" href="{{ printf "%s/" $e.id | relURL }}"><span>{{ $e.name }}: legal information</span>{{ partial "icon.html" "arrow" }}</a>
+  <a class="link" href="{{ "organisations/" | relURL }}"><span>All AWDPI organisations</span>{{ partial "icon.html" "arrow" }}</a>
+</nav>
+</div></div>
+{{ end }}

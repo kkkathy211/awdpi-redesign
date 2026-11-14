@@ -1,0 +1,12 @@
+{{- /* EN | 中文 switch: links to the same page in the other language, or to that language's home page. */ -}}
+{{- $page := . -}}
+{{- range hugo.Sites -}}
+  {{- $l := .Language -}}
+  {{- if eq $l.Lang site.Language.Lang -}}
+<a href="#" aria-current="true" lang="{{ $l.Locale }}">{{ $l.Label }}</a>
+  {{- else -}}
+    {{- $href := .Home.RelPermalink -}}
+    {{- range $page.Translations }}{{ if eq .Lang $l.Lang }}{{ $href = .RelPermalink }}{{ end }}{{ end -}}
+<a href="{{ $href }}" lang="{{ $l.Locale }}">{{ $l.Label }}</a>
+  {{- end -}}
+{{- end -}}

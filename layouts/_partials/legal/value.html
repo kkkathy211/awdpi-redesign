@@ -1,0 +1,15 @@
+{{- /*
+  One value from data/organisations.toml. "TBD" (or empty) becomes a visible placeholder,
+  https:// becomes a link, and a site path such as /uk/privacy/ becomes a link shown as the full awdpi.org address.
+*/ -}}
+{{- $v := "TBD" -}}
+{{- with . }}{{ $v = string . }}{{ end -}}
+{{- if eq $v "TBD" -}}
+<span class="tbd">TBD</span>
+{{- else if hasPrefix $v "https://" -}}
+<a href="{{ $v }}" target="_blank" rel="noopener">{{ $v }}</a>
+{{- else if hasPrefix $v "/" -}}
+<a href="{{ $v | relURL }}">{{ site.Params.address }}{{ strings.TrimPrefix "/" $v }}</a>
+{{- else -}}
+{{ $v }}
+{{- end -}}

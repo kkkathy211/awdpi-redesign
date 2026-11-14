@@ -1,0 +1,13 @@
+{{- /* Opening of a legal page, article or report. Context: dict with title, crumbs (HTML), and optional org, colour, sub (HTML), lead, wide. */ -}}
+<section class="lgh{{ if .article }} lgh--article{{ end }}{{ with .org }} c-{{ .colour }}{{ else }}{{ with $.colour }} c-{{ . }}{{ end }}{{ end }}">
+  <div class="wrap lgh__in{{ if .wide }} lgh__in--wide{{ end }}">
+    <p class="lgh__kicker">{{ with .org }}<span class="flag"><b>{{ .code }}</b></span>{{ end }}<span class="lgh__crumbs">{{ .crumbs }}</span></p>
+    <h1{{ with .lang }} lang="{{ . }}"{{ end }}>{{ .title }}</h1>
+    {{- with .sub }}
+    <p class="lgh__sub">{{ . }}</p>
+    {{- end }}
+    {{- with .lead }}
+    <p class="lgh__lead">{{ . }}</p>
+    {{- end }}
+  </div>
+</section>

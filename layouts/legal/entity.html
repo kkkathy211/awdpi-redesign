@@ -1,0 +1,77 @@
+{{- /*
+  Legal information page of one organisation: /uk/, /be/, /us/, /au/.
+  The page picks its data with `entity:` in front matter; all values are in data/organisations.toml.
+*/ -}}
+{{ define "main" }}
+{{- $v := "legal/value.html" -}}
+{{- $orgs := hugo.Data.organisations.org -}}
+{{- $e := index (where $orgs "id" .Params.entity) 0 -}}
+{{- $others := where $orgs "id" "ne" $e.id -}}
+{{- $crumbs := partial "legal/crumb.html" (slice (dict "title" "AWDPI organisations" "href" ("organisations/" | relURL)) (dict "title" "Legal information")) -}}
+{{ partial "legal/hero.html" (dict "title" $e.name "org" $e "crumbs" $crumbs "sub" (partial $v $e.legalName)) }}
+<div class="lg__body"><div class="wrap lg__in">
+<section class="card lgb" aria-labelledby="legal-information"><h2 id="legal-information">Legal information</h2><dl class="lgf">
+{{- if eq $e.id "uk" -}}
+  <div><dt>Legal form</dt><dd>{{ partial $v $e.organisationType }}</dd></div>
+  <div><dt>Registered with</dt><dd>{{ partial $v $e.regulator }}</dd></div>
+  <div><dt>Charity number</dt><dd>{{ partial $v $e.registrationNumber }}</dd></div>
+  {{- with $e.workingName }}<div><dt>Working name</dt><dd>{{ partial $v . }}</dd></div>{{ end }}
+  {{- with $e.companyNumber }}<div><dt>Company number</dt><dd>{{ partial $v . }}</dd></div>{{ end }}
+  <div><dt>Registered address</dt><dd>{{ partial $v $e.registeredAddress }}</dd></div>
+  <div><dt>Register entry</dt><dd>{{ partial $v $e.registerURL }}</dd></div>
+{{- else if eq $e.id "be" -}}
+  <div><dt>Legal form</dt><dd>{{ partial $v $e.legalForm }}{{ with $e.legalFormEnglish }}, an {{ . }}{{ end }}</dd></div>
+  <div><dt>Enterprise number</dt><dd>{{ partial $v $e.registrationNumber }} (KBO/BCE)</dd></div>
+  {{- with $e.rpm }}<div><dt>Register of legal entities</dt><dd>{{ partial $v . }}</dd></div>{{ end }}
+  <div><dt>Registered office</dt><dd>{{ partial $v $e.registeredAddress }}</dd></div>
+  <div><dt>Statutes</dt><dd>Published in the Annexes to the Belgian Official Gazette, {{ if and $e.statutesURL (ne (string $e.statutes) "TBD") }}<a href="{{ $e.statutesURL }}" target="_blank" rel="noopener"><span class="nowrap">{{ $e.statutes }}</span></a>{{ else }}{{ partial $v $e.statutes }}{{ end }}</dd></div>
+  <div><dt>Register entry</dt><dd>{{ partial $v $e.registerURL }}</dd></div>
+{{- else if eq $e.id "us" -}}
+  <div><dt>Legal form</dt><dd>Nonprofit corporation in {{ partial $v $e.state }}, recognised by the IRS as tax-exempt under Section <span class="nowrap">501(c)(3)</span></dd></div>
+  <div><dt>EIN</dt><dd>{{ partial $v $e.registrationNumber }}</dd></div>
+  <div><dt>Address</dt><dd>{{ partial $v $e.registeredAddress }}</dd></div>
+  <div><dt>IRS determination letter</dt><dd>{{ partial $v $e.registerURL }}</dd></div>
+{{- else if eq $e.id "au" -}}
+  <div><dt>Legal form</dt><dd>{{ partial $v $e.legalForm }}, registered charity with the ACNC</dd></div>
+  <div><dt>ABN</dt><dd>{{ partial $v $e.registrationNumber }}</dd></div>
+  <div><dt>DGR status</dt><dd>{{ partial $v $e.dgrStatus }}</dd></div>
+  <div><dt>Registered address</dt><dd>{{ partial $v $e.registeredAddress }}</dd></div>
+  <div><dt>Register entry</dt><dd>{{ partial $v $e.registerURL }}</dd></div>
+{{- end -}}
+</dl></section>
+<section class="card lgb" aria-labelledby="contact"><h2 id="contact">Contact</h2><dl class="lgf">
+  <div><dt>Email</dt><dd>{{ with $e.email }}<a href="mailto:{{ . }}">{{ . }}</a>{{ else }}{{ partial $v "TBD" }}{{ end }}</dd></div>
+  <div><dt>Phone</dt><dd>{{ if and $e.phone (ne (string $e.phone) "TBD") }}<a href="tel:{{ replaceRE `[^+0-9]` "" $e.phone }}">{{ $e.phone }}</a>{{ else }}{{ partial $v "TBD" }}{{ end }}</dd></div>
+</dl></section>
+<section class="card lgb" aria-labelledby="about-us"><h2 id="about-us">About us</h2><p>{{ partial $v $e.about }}</p></section>
+<section class="card lgb" aria-labelledby="network"><h2 id="network">Our place in the AWDPI network</h2><p>
+  {{- if eq $e.id "uk" -}}
+  {{ $e.name }} is an independent charity registered with the {{ partial $v $e.regulator }}.
+  {{- else if eq $e.id "be" -}}
+  {{ $e.name }} is an independent international non-profit association ({{ partial $v ($e.legalFormShort | default $e.legalForm) }}) registered in Belgium.
+  {{- else if eq $e.id "us" -}}
+  {{ $e.name }} is an independent <span class="nowrap">501(c)(3)</span> organisation incorporated in {{ partial $v $e.state }}.
+  {{- else if eq $e.id "au" -}}
+  {{ $e.name }} is an independent charity registered with the ACNC.
+  {{- end }} It is part of the AWDPI international network, together with {{ partial "legal/names.html" $others }}. Each organisation is registered separately and is responsible for its own activities, funds and personal data.
+  {{- if $e.hostsSecretariat }} {{ $e.name }} also hosts the AWDPI Global Secretariat.{{ end -}}
+</p></section>
+{{- if eq $e.id "us" }}
+<section class="card lgb" aria-labelledby="donations"><h2 id="donations">Donations</h2><p>Contributions to {{ partial $v $e.legalName }} are tax-deductible to the extent allowed by law. EIN {{ partial $v $e.registrationNumber }}.</p></section>
+{{- else if $e.donations }}
+<section class="card lgb" aria-labelledby="donations"><h2 id="donations">Donations</h2><p>{{ partial $v $e.donations }}</p></section>
+{{- end }}
+<section class="card lgb" aria-labelledby="privacy"><h2 id="privacy">Privacy</h2><dl class="lgf">
+  <div><dt>Privacy notice</dt><dd>{{ partial $v $e.privacyURL }}</dd></div>
+  {{- if in (slice "uk" "be") $e.id }}<div><dt>Data controller</dt><dd>{{ partial $v $e.legalName }}, {{ partial $v $e.registeredAddress }}</dd></div>{{ end }}
+</dl></section>
+{{ partial "legal/updated.html" $e.lastUpdated }}
+<nav class="lgn" aria-label="AWDPI organisations">
+  <h2 class="lgn__h">Other AWDPI organisations</h2>
+  <ul class="lgn__list">
+    {{- range $others }}<li><a class="card lgn__org c-{{ .colour }}" href="{{ printf "%s/" .id | relURL }}"><span class="flag"><b>{{ .code }}</b></span><span><b>{{ .name }}</b><span>{{ .idLabel }} {{ partial $v .registrationNumber }}</span></span><span class="lgn__go">{{ partial "icon.html" "arrow" }}</span></a></li>{{ end -}}
+  </ul>
+  <a class="link" href="{{ "organisations/" | relURL }}"><span>All AWDPI organisations</span>{{ partial "icon.html" "arrow" }}</a>
+</nav>
+</div></div>
+{{ end }}

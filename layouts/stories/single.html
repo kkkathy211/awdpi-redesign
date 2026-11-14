@@ -1,0 +1,23 @@
+{{- /* One article: /stories/<name>/. Text: content/stories/ (both languages) or content/<lang>/stories/. Images: static/media/stories/. */ -}}
+{{ define "main" }}
+{{- $crumbs := partial "legal/crumb.html" (slice (dict "title" (T "storiesBack") "href" ("stories/" | relLangURL)) (dict "title" (cond .Date.IsZero (T "undated") (partial "day.html" .Date)))) -}}
+{{- $lang := cond (findRE `\p{Han}` .Title 1) "zh-CN" "en" -}}
+{{ partial "legal/hero.html" (dict "title" .Title "crumbs" $crumbs "article" true "lang" $lang) }}
+<div class="lg__body"><div class="wrap lg__in">
+<article class="card art" lang="{{ $lang }}">
+{{- with .Params.image }}
+<img class="art__cover" src="{{ . | relURL }}" alt="">
+{{- end }}
+<div class="art__body">
+{{- /* Background images in the WeChat markup sit in style attributes, which Hugo's relativeURLs does not rewrite,
+       so point them at static/media/ relative to this page. */ -}}
+{{- $up := strings.Repeat (len (split (strings.Trim .RelPermalink "/") "/")) "../" -}}
+{{- replace .Content "&quot;/media/" (printf "&quot;%smedia/" $up) | safeHTML -}}
+</div>
+</article>
+<nav class="lgn lgn--plain" aria-label="{{ T "storiesBack" }}">
+  <a class="link" href="{{ "stories/" | relLangURL }}"><span>{{ T "storiesBack" }}</span>{{ partial "icon.html" "arrow" }}</a>
+  <a class="link" href="{{ "stories/all/" | relLangURL }}"><span>{{ T "storiesAll" }}</span>{{ partial "icon.html" "arrow" }}</a>
+</nav>
+</div></div>
+{{ end }}
