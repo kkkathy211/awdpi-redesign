@@ -128,18 +128,33 @@ colour = "orange"
 name = "AWDPI Australia"
 country = "Australia"
 countryZh = "澳大利亚"
-legalName = "TBD"               # 与 ACNC Charity Register 一字不差
-legalForm = "TBD"               # Incorporated association / company limited by guarantee
+# 以下取自 ABN Lookup 和 ASIC 公司登记（2026-11-15 核对）
+legalName = "ASIAN WOMEN DEVELOPMENT PLAN INTERNATIONAL AUSTRALIA LTD"
+legalForm = "Australian Public Company, Limited By Guarantee"   # ASIC 登记的 Type
+acn = "696 745 856"             # ASIC 公司号（2026-03-31 在 ASIC 注册）
 idLabel = "ABN"
 footerLabel = "ABN"
 footerLabelZh = "ABN"
-registrationNumber = "TBD"      # ABN，格式 12 345 678 901
-dgrStatus = "TBD"               # Endorsed as a Deductible Gift Recipient / Not endorsed
-registeredAddress = "TBD"       # 与 ACNC 登记一致
-registerURL = "TBD"             # ACNC Charity Register 上本主体的记录页
+registrationNumber = "37 696 745 856"   # ABN，2026-06-09 起生效
+# ACNC 慈善机构登记：申请审核中。获批后把 acncRegistered 改成 true，
+# 页面会改写成 "registered charity with the ACNC"，并把 registerURL 换成 ACNC Charity Register 上的记录页
+acncRegistered = false
+acncStatus = "Application under review"
+dgrStatus = "Not entitled to receive tax deductible gifts"   # ABN Lookup 上的 DGR 状态，原文照抄
+# ASIC 免费公开记录只显示注册办公地址所在地（Locality of registered office），这里照抄
+registeredAddress = "GLEN WAVERLEY VIC 3150"
+registerURL = "https://abr.business.gov.au/ABN/View?abn=37696745856"   # ABN Lookup 记录页
 email = "au@awdpi.org"
-phone = "TBD"                   # +61 ...
-about = "TBD"
-donations = "TBD"               # 有 DGR 认定：Donations of $2 or more are tax-deductible in Australia.  没有的话改成 ""
-privacyURL = "TBD"
-lastUpdated = "2026-11-13"
+phone = "TBD"                   # +61 ...，等澳大利亚主体提供
+# 简介由前端根据网站上的澳大利亚内容起草，请澳大利亚管理员确认
+about = """\
+  AWDPI Australia supports Asian women living in Australia who are affected by domestic \
+  violence, gender-based violence or discrimination. It offers multilingual help, legal \
+  information and referrals to local support services, and shares AWDPI's Chinese-language \
+  handbook on domestic violence law in Australia. It also works with local partners and \
+  volunteers to raise awareness of gender-based violence and to build community support for \
+  Asian women.\
+  """
+donations = ""                  # 没有 DGR 认定，所以不显示捐款一栏；获得 DGR 后改成 Donations of $2 or more are tax-deductible in Australia.
+privacyURL = "/au/privacy/"     # 隐私声明正文：content/en/au/privacy.md
+lastUpdated = "2026-11-15"
