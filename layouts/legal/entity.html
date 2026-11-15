@@ -32,10 +32,12 @@
   <div><dt>Address</dt><dd>{{ partial $v $e.registeredAddress }}</dd></div>
   <div><dt>IRS determination letter</dt><dd>{{ partial $v $e.registerURL }}</dd></div>
 {{- else if eq $e.id "au" -}}
-  <div><dt>Legal form</dt><dd>{{ partial $v $e.legalForm }}, registered charity with the ACNC</dd></div>
+  <div><dt>Legal form</dt><dd>{{ partial $v $e.legalForm }}{{ if $e.acncRegistered }}, registered charity with the ACNC{{ end }}</dd></div>
+  {{- with $e.acn }}<div><dt>ACN</dt><dd>{{ partial $v . }}</dd></div>{{ end }}
   <div><dt>ABN</dt><dd>{{ partial $v $e.registrationNumber }}</dd></div>
+  {{- if not $e.acncRegistered }}<div><dt>ACNC registration</dt><dd>{{ partial $v $e.acncStatus }}</dd></div>{{ end }}
   <div><dt>DGR status</dt><dd>{{ partial $v $e.dgrStatus }}</dd></div>
-  <div><dt>Registered address</dt><dd>{{ partial $v $e.registeredAddress }}</dd></div>
+  <div><dt>Registered office</dt><dd>{{ partial $v $e.registeredAddress }}</dd></div>
   <div><dt>Register entry</dt><dd>{{ partial $v $e.registerURL }}</dd></div>
 {{- end -}}
 </dl></section>
@@ -51,8 +53,10 @@
   {{ $e.name }} is an independent international non-profit association ({{ partial $v ($e.legalFormShort | default $e.legalForm) }}) registered in Belgium.
   {{- else if eq $e.id "us" -}}
   {{ $e.name }} is an independent <span class="nowrap">501(c)(3)</span> organisation incorporated in {{ partial $v $e.state }}.
-  {{- else if eq $e.id "au" -}}
+  {{- else if and (eq $e.id "au") $e.acncRegistered -}}
   {{ $e.name }} is an independent charity registered with the ACNC.
+  {{- else if eq $e.id "au" -}}
+  {{ $e.name }} is an independent public company limited by guarantee, registered with the Australian Securities &amp; Investments Commission (ASIC). Its application to register as a charity with the Australian Charities and Not-for-profits Commission (ACNC) is under review.
   {{- end }} It is part of the AWDPI international network, together with {{ partial "legal/names.html" $others }}. Each organisation is registered separately and is responsible for its own activities, funds and personal data.
   {{- if $e.hostsSecretariat }} {{ $e.name }} also hosts the AWDPI Global Secretariat.{{ end -}}
 </p></section>
