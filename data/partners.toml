@@ -1,0 +1,214 @@
+# 关于页"400+ 合作伙伴"一栏的机构标志。
+# 每个分组一段，顺序就是页面上的顺序。标志文件放在 static/img/partners/，优先用 SVG。
+#   name    英文名称（显示在标志下方，也是图片的替代文字）
+#   nameZh  中文名称（中文页使用；没有就用英文名称）
+#   logo    标志文件名；暂时没有标志时留空，页面会用 short（或名称）显示一个文字标志
+#   shape   可选：wide（很宽的横版标志）或 tall（竖版或圆形标志），用来微调大小
+
+[[group]]
+title = "UN agencies, government departments and diplomatic missions"
+titleZh = "联合国成员组织、政府相关部门、使领馆等"
+
+  [[group.partner]]
+  name = "UN Women"
+  nameZh = "联合国妇女署"
+  logo = "un-women.svg"
+  shape = "wide"
+
+  [[group.partner]]
+  name = "UNDP"
+  nameZh = "联合国开发计划署"
+  logo = "undp.svg"
+  shape = "tall"
+
+  [[group.partner]]
+  name = "UNHCR, the UN Refugee Agency"
+  nameZh = "联合国难民署"
+  logo = "unhcr.svg"
+  shape = "wide"
+
+  [[group.partner]]
+  name = "UNFPA"
+  nameZh = "联合国人口基金"
+  logo = "unfpa.svg"
+
+  [[group.partner]]
+  name = "UNESCO"
+  nameZh = "联合国教科文组织"
+  logo = "unesco.svg"
+
+  [[group.partner]]
+  name = "United Nations"
+  nameZh = "联合国"
+  logo = "united-nations.svg"
+
+  [[group.partner]]
+  name = "World Bank Group"
+  nameZh = "世界银行集团"
+  logo = "world-bank.svg"
+  shape = "wide"
+
+  [[group.partner]]
+  name = "International Labour Organization"
+  nameZh = "国际劳工组织"
+  logo = "ilo.svg"
+  shape = "wide"
+
+  [[group.partner]]
+  name = "World Health Organization"
+  nameZh = "世界卫生组织"
+  logo = "who.svg"
+  shape = "wide"
+
+  [[group.partner]]
+  name = "World Women Organization"
+  logo = "world-women-organization.jpg"
+  shape = "tall"
+
+  [[group.partner]]
+  name = "European Union"
+  nameZh = "欧盟"
+  logo = "european-union.svg"
+
+  [[group.partner]]
+  name = "European Parliament"
+  nameZh = "欧洲议会"
+  logo = "european-parliament.svg"
+
+  [[group.partner]]
+  name = "Asia Women's Development Association"
+  nameZh = "亚洲女性发展协会"
+  logo = "asia-womens-development-association.png"
+  shape = "tall"
+
+  [[group.partner]]
+  name = "Ministry of Foreign Affairs of the Russian Federation"
+  nameZh = "俄罗斯联邦外交部"
+  logo = "russia-mfa.svg"
+  shape = "tall"
+
+  [[group.partner]]
+  name = "U.S. Embassy"
+  nameZh = "美国大使馆"
+  logo = "us-embassy.svg"
+  shape = "tall"
+
+  [[group.partner]]
+  name = "UK Government"
+  nameZh = "英国政府"
+  logo = "uk-government.svg"
+  shape = "tall"
+
+[[group]]
+title = "Women's organizations, non-profits and youth associations"
+titleZh = "女性组织、公益机构、青年社团等"
+
+  [[group.partner]]
+  name = "Women Enabled International"
+  logo = "women-enabled-international.png"
+  shape = "wide"
+
+  [[group.partner]]
+  name = "Women's Refugee Commission"
+  nameZh = "妇女难民委员会"
+  logo = "womens-refugee-commission.svg"
+
+  [[group.partner]]
+  name = "Women's International League for Peace and Freedom"
+  nameZh = "国际妇女争取和平与自由联盟"
+  logo = "wilpf.svg"
+  shape = "tall"
+
+  [[group.partner]]
+  name = "Global Fund for Women"
+  nameZh = "全球妇女基金"
+  logo = "global-fund-for-women.svg"
+  shape = "wide"
+
+  [[group.partner]]
+  name = "Global Summit of Women"
+  nameZh = "全球女性峰会"
+  logo = "global-summit-of-women.png"
+  shape = "tall"
+
+  [[group.partner]]
+  name = "Global Network of Women Peacebuilders"
+  nameZh = "全球女性和平建设者网络"
+  logo = "gnwp.png"
+  shape = "wide"
+
+  [[group.partner]]
+  name = "Nobel Women's Initiative"
+  nameZh = "诺贝尔女性倡议"
+  logo = "nobel-womens-initiative.svg"
+
+  [[group.partner]]
+  name = "International China Concern"
+  nameZh = "国际关心中国慈善协会"
+  logo = "international-china-concern.png"
+  shape = "wide"
+
+  [[group.partner]]
+  name = "Global Student Support Network"
+  logo = "global-student-support-network.png"
+  shape = "tall"
+
+[[group]]
+title = "Universities, media outlets and companies"
+titleZh = "学术研究机构、媒体、企业等"
+
+  [[group.partner]]
+  name = "EuAsia News"
+  nameZh = "凤凰欧亚"
+  logo = "euasia-news.jpg"
+
+  [[group.partner]]
+  name = "iiiHER"
+  nameZh = "她刊"
+  logo = "iiiher.png"
+
+  [[group.partner]]
+  name = "Moonshot Academy"
+  nameZh = "探月学院"
+  logo = "moonshot-academy.jpg"
+  shape = "tall"
+
+  [[group.partner]]
+  name = "Lean In College, Lean In China"
+  nameZh = "励媖高校"
+  logo = "lean-in-college.png"
+  shape = "tall"
+
+  [[group.partner]]
+  name = "Feishu"
+  nameZh = "飞书"
+  logo = "feishu.png"
+  shape = "wide"
+
+  [[group.partner]]
+  name = "Global Women Connect"
+  logo = "global-women-connect.png"
+  shape = "tall"
+
+  [[group.partner]]
+  name = "Peking University School of Transnational Law"
+  nameZh = "北京大学国际法学院"
+  logo = "pku-school-of-transnational-law.png"
+  shape = "wide"
+
+  [[group.partner]]
+  name = "Society of Women Engineers"
+  logo = "society-of-women-engineers.svg"
+  shape = "wide"
+
+  [[group.partner]]
+  name = "Mary Kay"
+  nameZh = "玫琳凯"
+  logo = "mary-kay.svg"
+  shape = "wide"
+
+  [[group.partner]]
+  name = "Hansheng Law Offices"
+  nameZh = "汉盛律师事务所"
+  logo = "hansheng-law-offices.png"
+  shape = "wide"
