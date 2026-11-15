@@ -545,10 +545,6 @@ a:hover .arrow { background: var(--c); color: var(--ink); transform: translateX(
 .award h3 { font-size: 21px; margin-bottom: 8px; }
 .award p { color: var(--muted); font-size: 15.5px; }
 
-.partners { padding: 30px 34px; }
-.partners + .partners { margin-top: 16px; }
-.partners h3 { font: 600 16px/1.4 var(--f-t); color: var(--muted); margin-bottom: 18px; letter-spacing: 0; }
-.partners img { width: 100%; max-width: 980px; }
 
 .report-dl { display: grid; grid-template-columns: 200px 1fr auto; gap: 34px; align-items: center; padding: 26px 34px 26px 26px; }
 .report-dl .frame { aspect-ratio: 3 / 4; border-radius: 12px; }
@@ -877,7 +873,6 @@ a:hover .arrow { background: var(--c); color: var(--ink); transform: translateX(
   .report-dl h3 { font-size: 20px; }
   .item { grid-template-columns: 1fr; padding: 22px; }
   .award { grid-template-columns: 1fr; }
-  .partners { padding: 22px 18px; }
   .dir { display: grid; grid-template-columns: 96px 1fr; gap: 16px; padding: 12px; align-items: center; }
   .dir .frame { aspect-ratio: 1; border-radius: 12px; }
   .dir__body { padding: 0; gap: 4px; }
@@ -1929,3 +1924,27 @@ a.net__org:hover .net__go svg { transform: translateX(3px); }
   .dpick__soon { grid-column: 2; grid-row: 2; justify-self: start; }
   .dfacts > div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
 }
+
+/* ---------- About: partner logos. Data in data/partners.toml, files in static/img/partners/.
+   Every logo sits in the same tile and is fitted to the same box, so marks of any shape line up. */
+.pwall { display: flex; flex-direction: column; gap: clamp(28px, 4vw, 44px); }
+.pgroup__h { margin-bottom: 16px; font: 600 15px/1.4 var(--f-t); letter-spacing: 0; color: var(--muted); }
+.plogos { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 12px; }
+.plogo { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 22px 16px 16px; border-radius: var(--r-sm); background: var(--surface); box-shadow: var(--shadow); transition: transform .25s var(--ease), box-shadow .25s; }
+.plogo__img { display: grid; place-items: center; width: 100%; height: 64px; }
+.plogo__img img { max-width: min(100%, 150px); max-height: 64px; width: auto; height: auto; object-fit: contain; }
+.plogo--wide .plogo__img img { max-width: 100%; max-height: 52px; }
+.plogo--tall .plogo__img img { max-height: 64px; max-width: 72px; }
+.plogo__name { font-size: 13px; line-height: 1.35; text-align: center; color: var(--muted); text-wrap: balance; }
+@media (hover: hover) {
+  .plogo__img img { filter: grayscale(1); opacity: .72; transition: filter .3s, opacity .3s; }
+  .plogo:hover { transform: translateY(-2px); box-shadow: var(--shadow-up); }
+  .plogo:hover .plogo__img img { filter: none; opacity: 1; }
+}
+@media (max-width: 680px) {
+  .plogos { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .plogo { padding: 18px 12px 12px; }
+  .plogo__img { height: 54px; }
+  .plogo__img img { max-height: 54px; }
+}
+.plogo__img--text { font: 700 19px/1.2 var(--f-d); letter-spacing: -0.01em; text-align: center; color: var(--ink); opacity: .72; }

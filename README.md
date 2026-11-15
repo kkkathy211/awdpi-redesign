@@ -17,6 +17,7 @@ content/
   stories/             两种语言共用的文章（多数文章只有中文版）
 data/organisations.toml  四个注册主体的法律信息
 data/donate.toml         捐赠页：各国的开通状态、币种、嵌入的捐赠工具、外部公益平台和项目
+data/partners.toml       关于页的合作伙伴标志（文件在 static/img/partners/）
 i18n/en.toml, zh-cn.toml  模板里的界面文字（页头、页脚、按钮）
 layouts/               模板
 static/
@@ -62,6 +63,8 @@ static/
 **改页头或页脚**：文字在 `i18n/`，链接在 `hugo.toml` 的菜单里，结构在 `layouts/_partials/`。
 
 **改主体的法律信息**：只改 `data/organisations.toml`，文件开头有填写规则。法律信息页、页脚、关于页卡片和隐私声明里的名称编号都会一起更新。
+
+**增删合作伙伴**：编辑 `data/partners.toml`，标志文件放进 `static/img/partners/`（优先 SVG，其次透明背景的 PNG）。暂时没有标志的，`logo` 留空，页面会显示文字标志。
 
 **开通某个国家的捐赠**：在 `data/donate.toml` 里把这个国家的 `status` 改成 `"open"`，把捐赠工具（例如美国的 Givebutter）给的嵌入代码粘贴到 `embed`，外部公益平台的活动（例如 GoFundMe）加到 `campaigns`。文件开头列了开通前要做的事，包括更新隐私声明。页面上的"捐赠须知"在 `content/<语言>/donate/<国家>.md`，由各主体提供合规写法；中文页下方会自动附上英文原文。
 

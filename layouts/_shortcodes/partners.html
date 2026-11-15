@@ -1,0 +1,18 @@
+{{- /* The partner logo wall on the About page. Data: data/partners.toml; logos: static/img/partners/ */ -}}
+{{- $zh := eq site.Language.Lang "zh-cn" -}}
+<div class="pwall">
+{{- range hugo.Data.partners.group }}
+<section class="pgroup" data-reveal aria-label="{{ if $zh }}{{ .titleZh }}{{ else }}{{ .title }}{{ end }}">
+  <h3 class="pgroup__h">{{ if $zh }}{{ .titleZh }}{{ else }}{{ .title }}{{ end }}</h3>
+  <ul class="plogos">
+    {{- range .partner }}
+    {{- $name := cond (and $zh .nameZh) .nameZh .name }}
+    <li class="plogo{{ with .shape }} plogo--{{ . }}{{ end }}">
+      {{- if .logo }}<span class="plogo__img"><img src="{{ printf "img/partners/%s" .logo | relURL }}" alt="{{ $name }}" loading="lazy" decoding="async"></span>
+      {{- else }}<span class="plogo__img plogo__img--text" aria-hidden="true">{{ .short | default $name }}</span>{{ end -}}
+      {{- if or .logo (ne (.short | default $name) $name) }}<span class="plogo__name">{{ $name }}</span>{{ end }}</li>
+    {{- end }}
+  </ul>
+</section>
+{{- end }}
+</div>
