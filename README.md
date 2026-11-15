@@ -50,7 +50,7 @@ static/
 | `/research/`、`/research/<id>/` | `content/<语言>/research/` |
 | `/stories/`、`/stories/<名称>/`、`/stories/all/` | `content/<语言>/stories/`、`content/stories/` |
 | `/organisations/`、`/uk/`、`/be/`、`/us/`、`/au/` | `content/en/`，内容来自 `data/organisations.toml` |
-| `/uk/privacy/`、`/be/privacy/`、`/us/privacy/` | `content/en/<id>/privacy.md` |
+| `/uk/privacy/`、`/be/privacy/`、`/us/privacy/`、`/au/privacy/` | `content/en/<id>/privacy.md` |
 | `/privacy/`、`/terms/` | `content/<语言>/privacy.md`、`terms.md` |
 | `/donate/`、`/donate/us/`、`/donate/uk/`、`/donate/be/`、`/donate/au/` | `content/<语言>/donate/`，设置在 `data/donate.toml` |
 
@@ -86,8 +86,10 @@ image: /media/stories/<名称>/cover.webp
 ## 上线前
 
 1. `hugo.toml` 里把 `preview` 改成 `false`：去掉每页的 `noindex`，`robots.txt` 允许抓取并给出 sitemap。
-2. GitHub 仓库 Settings > Pages > Source 选 "GitHub Actions"（`.github/workflows/deploy.yml` 负责构建和发布）。
-3. 绑定域名 awdpi.org 时，在 Settings > Pages 设置自定义域名。
-4. 分享图 `static/share.jpg` 还没有，社交媒体分享时不会显示图片。
+2. 绑定域名 awdpi.org 时，在 GitHub 仓库 Settings > Pages 设置自定义域名（发布由 `.github/workflows/deploy.yml` 负责）。
+3. 分享图 `static/share.jpg` 还没有，社交媒体分享时不会显示图片。
+4. 隐私声明写明的存储地点要先落实：英国和比利时机构的邮件和个案记录存放在欧盟，美国机构的存放在美国，澳大利亚机构的存放在澳大利亚。
+5. 各国隐私声明（`content/en/<id>/privacy.md`）开头注释里列出的事项，由各机构逐项确认，包括保存期限和回复时限。
+6. "支持我们"页的留言表单接通后，在隐私页（`content/en/privacy.md` 和中文版）写明投递留言的服务。
 
 整站约 1.3 GB，其中文章图片约 1.1 GB（旧网站发布的内容约 1.5 GB）。

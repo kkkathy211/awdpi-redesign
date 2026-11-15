@@ -1839,6 +1839,22 @@ a.net__org:hover .net__go svg { transform: translateX(3px); }
 .lgp li { position: relative; padding-left: 22px; }
 .lgp li::before { content: ""; position: absolute; left: 3px; top: .72em; width: 7px; height: 7px; border-radius: 50%; background: var(--orange); }
 .lgp strong { font-weight: 700; }
+.lgp li > ul { margin-top: 10px; }
+/* purposes and lawful bases: two columns; on phones each row stacks */
+.lgp table { width: 100%; border-collapse: collapse; font-size: 16px; line-height: 1.6; }
+.lgp th, .lgp td { text-align: left; vertical-align: top; padding: 16px 20px 16px 0; border-top: 1px solid var(--line); }
+.lgp th:last-child, .lgp td:last-child { padding-right: 0; }
+.lgp thead th { border-top: 0; padding-top: 0; font: 600 13px/1.3 var(--f-t); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.lgp td:first-child { width: 44%; }
+.lgp td:last-child { color: var(--muted); }
+@media (max-width: 640px) {
+  .lgp table, .lgp tbody, .lgp tr, .lgp td { display: block; width: auto; }
+  .lgp thead { display: none; }
+  .lgp tr { padding: 16px 0; border-top: 1px solid var(--line); }
+  .lgp td { padding: 0; border: 0; }
+  .lgp td:first-child { width: auto; }
+  .lgp td + td { margin-top: 8px; font-size: 15px; }
+}
 
 @media (max-width: 860px) {
   .lgn__list, .lgo { grid-template-columns: minmax(0, 1fr); }
