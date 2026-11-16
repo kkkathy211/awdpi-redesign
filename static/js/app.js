@@ -612,3 +612,174 @@ const headStuck = () => { const h = document.querySelector('.site'); return h ? 
     boxes.forEach(b => b.addEventListener('change', update));
   });
 })();
+
+// Research: the monthly review as a shelf. Running the pointer along it lifts the issue underneath and its neighbours
+// (like a dock); a tag names the issue. A click or tap keeps one pulled out; it starts on the latest issue.
+(() => {
+  const box = document.querySelector('[data-shelf]'); if (!box) return;
+  const row = box.querySelector('.shelf__row'), tag = box.querySelector('[data-shelf-tag]'), rack = box.querySelector('.shelf__rack');
+  const sp = [...row.querySelectorAll('.spine')]; if (!sp.length || !tag) return;
+  const zh = document.documentElement.lang.startsWith('zh');
+  let pinned = sp.length - 1;
+  const show = (k, dock) => {
+    sp.forEach((s, i) => {
+      const d = Math.abs(i - k);
+      s.style.setProperty('--lift', i === k ? 28 : (dock ? Math.max(0, 18 - d * 6) : 0));
+      s.classList.toggle('is-on', i === k);
+    });
+    tag.textContent = zh ? `第 ${k + 1} 期` : `Issue ${k + 1}`;
+    const r = rack.getBoundingClientRect(), b = sp[k].getBoundingClientRect(), half = tag.offsetWidth / 2 + 2;
+    const x = Math.min(r.width - half, Math.max(half, b.left - r.left + b.width / 2));
+    tag.style.setProperty('--x', x + 'px');
+    tag.style.setProperty('--y', Math.max(0, sp[k].offsetTop - 28 - tag.offsetHeight - 8) + 'px');
+  };
+  const at = x => {
+    const r = row.getBoundingClientRect();
+    return Math.max(0, Math.min(sp.length - 1, Math.floor((x - r.left) / r.width * sp.length)));
+  };
+  row.addEventListener('pointermove', e => show(at(e.clientX), true));
+  row.addEventListener('pointerdown', e => { pinned = at(e.clientX); show(pinned, true); });
+  row.addEventListener('pointerup', e => { if (e.pointerType !== 'mouse') { pinned = at(e.clientX); show(pinned, false); } });
+  row.addEventListener('pointerleave', () => show(pinned, false));
+  row.addEventListener('pointercancel', () => show(pinned, false));
+  addEventListener('resize', () => show(pinned, false));
+  show(pinned, false);
+  const ready = () => box.classList.add('is-ready');
+  if (STILL || !('IntersectionObserver' in window)) { ready(); return; }
+  const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setTimeout(ready, 1300); io.disconnect(); } }, { threshold: 0.12 });
+  io.observe(box);
+})();
+
+// Stories: articles per year. Pointing at, tapping or tabbing to a bar fades the others, shows its value
+// and puts that year's figure in the big number; leaving the chart brings back the total.
+(() => {
+  const box = document.querySelector('[data-yearchart]'); if (!box) return;
+  const bars = [...box.querySelectorAll('.chart2__bar')], plot = box.querySelector('.chart2__plot');
+  const n = box.querySelector('[data-yc-n]'), l = box.querySelector('[data-yc-l]');
+  const n0 = n.textContent, l0 = l.textContent;
+  const on = b => {
+    bars.forEach(x => x.classList.toggle('is-on', x === b));
+    box.classList.toggle('has-on', !!b);
+    n.textContent = b ? b.dataset.n : n0;
+    l.textContent = b ? b.dataset.l : l0;
+  };
+  bars.forEach(b => {
+    b.addEventListener('pointerenter', () => on(b));
+    b.addEventListener('focus', () => on(b));
+    b.addEventListener('click', () => on(b));
+    b.addEventListener('blur', () => setTimeout(() => { if (!box.contains(document.activeElement)) on(null); }, 0));
+  });
+  plot.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse' && !box.contains(document.activeElement)) on(null); });
+  document.addEventListener('pointerdown', e => { if (!box.contains(e.target)) on(null); });
+})();
+
+// Stories: the three kinds of article beside the chart filter the latest articles further down.
+(() => {
+  const calm = STILL || matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll('[data-goto-filter]').forEach(a => a.addEventListener('click', e => {
+    const b = document.querySelector(`[data-filters="story-grid"] [data-filter="${a.dataset.gotoFilter}"]`);
+    if (!b) return;
+    e.preventDefault();
+    b.click();
+    const bar = b.closest('[data-filters]');
+    scrollTo({ top: bar.getBoundingClientRect().top + scrollY - headStuck() - 16, behavior: calm ? 'auto' : 'smooth' });
+  }));
+})();
+
+// Support us: choosing a way to work with us goes to the form, ticks the matching topic and starts the message.
+(() => {
+  const form = document.querySelector('#write .reach__form'); if (!form) return;
+  const cards = [...document.querySelectorAll('[data-way-topic]')];
+  const msg = form.querySelector('#msg'), first = form.querySelector('#fn');
+  const calm = STILL || matchMedia('(prefers-reduced-motion: reduce)').matches;
+  cards.forEach(c => c.addEventListener('click', e => {
+    e.preventDefault();
+    cards.forEach(x => x.classList.toggle('is-picked', x === c));
+    const r = form.querySelector(`input[name="topic"][value="${c.dataset.wayTopic}"]`);
+    if (r) r.checked = true;
+    if (msg && (!msg.value.trim() || msg.value === msg.dataset.auto)) { msg.value = c.dataset.wayLine; msg.dataset.auto = c.dataset.wayLine; }
+    const sec = document.getElementById('write');
+    scrollTo({ top: sec.getBoundingClientRect().top + scrollY - headStuck() - 8, behavior: calm ? 'auto' : 'smooth' });
+    form.classList.remove('is-flash'); void form.offsetWidth; form.classList.add('is-flash');
+    setTimeout(() => { if (first) first.focus({ preventScroll: true }); }, calm ? 0 : 600);
+  }));
+})();
+
+// Avoice chat, on every page. The launcher opens a panel; the assistant loads in a sandboxed frame and talks to
+// this page with the same messages as awdpi.org. The assistant only lets awdpi.org show it inside a page, so
+// anywhere else (this preview) the panel offers it in a new tab instead. Nothing loads until the panel opens.
+(() => {
+  const box = document.querySelector('[data-chat]'); if (!box) return;
+  const launch = box.querySelector('[data-chat-launch]'), panel = box.querySelector('[data-chat-panel]');
+  const body = box.querySelector('[data-chat-body]'), state = box.querySelector('[data-chat-state]');
+  const status = box.querySelector('[data-chat-status]'), hint = box.querySelector('[data-chat-hint]');
+  const dots = box.querySelector('[data-chat-dots]'), acts = box.querySelector('[data-chat-acts]');
+  const retry = box.querySelector('[data-chat-retry]'), openA = box.querySelector('[data-chat-open]');
+  const closeB = box.querySelector('[data-chat-close]'), d = box.dataset, lang = d.chatLang || 'en';
+  let url;
+  try { url = new URL(d.widget); } catch (e) { return; }
+  if (url.protocol !== 'https:' || url.pathname !== '/widget' || url.origin === location.origin) return;
+  const embedOK = /(^|\.)awdpi\.org$/.test(location.hostname);
+  const tab = new URL(url); tab.searchParams.set('lang', lang);
+  openA.href = tab.href;
+  const openText = openA.textContent;
+  let frame = null, timer = 0, ready = false;
+  const send = type => { try { frame && frame.contentWindow && frame.contentWindow.postMessage({ type, version: 1, lang, parentOrigin: location.origin }, url.origin); } catch (e) {} };
+  const drop = () => { clearTimeout(timer); if (frame) { send('avoice:dispose'); frame.remove(); frame = null; } ready = false; };
+  const setState = (st, hi, busy, withActs) => {
+    state.hidden = false; status.textContent = st; hint.textContent = hi;
+    dots.hidden = !busy; acts.hidden = !withActs; panel.setAttribute('aria-busy', String(busy));
+  };
+  const fail = () => {
+    drop();
+    retry.hidden = false; openA.className = 'chat__open'; openA.textContent = openText;
+    setState(d.slow, d.slowHint, false, true);
+  };
+  const preview = () => {
+    retry.hidden = true; openA.className = 'chat__open btn btn--main'; openA.textContent = d.openLabel + ' ↗';
+    setState(d.preview, d.previewHint, false, true);
+  };
+  const connect = () => {
+    drop();
+    if (!embedOK) { preview(); return; }
+    setState(d.connecting, d.connectingHint, true, false);
+    const src = new URL(url); src.searchParams.set('lang', lang); src.searchParams.set('parentOrigin', location.origin);
+    frame = document.createElement('iframe');
+    frame.className = 'chat__frame'; frame.title = d.frameTitle; frame.hidden = true;
+    frame.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+    frame.setAttribute('allow', "camera 'none'; microphone 'none'; geolocation 'none'; autoplay 'none'");
+    frame.referrerPolicy = 'no-referrer';
+    frame.addEventListener('load', () => send('avoice:init'));
+    frame.src = src.href;
+    body.appendChild(frame);
+    timer = setTimeout(() => { if (!ready) fail(); }, 15000);
+  };
+  const place = () => box.style.setProperty('--chat-top', (headStuck() + 8) + 'px');
+  const isOpen = () => !panel.hidden;
+  const show = () => {
+    place(); panel.hidden = false; launch.setAttribute('aria-expanded', 'true'); document.documentElement.classList.add('chat-open');
+    if (!frame) connect();
+    setTimeout(() => { (ready && frame ? frame : closeB).focus({ preventScroll: true }); }, 30);
+  };
+  const hide = (back = true) => {
+    if (!isOpen()) return;
+    panel.hidden = true; launch.setAttribute('aria-expanded', 'false'); document.documentElement.classList.remove('chat-open');
+    drop();
+    if (back) launch.focus({ preventScroll: true });
+  };
+  launch.addEventListener('click', () => (isOpen() ? hide() : show()));
+  closeB.addEventListener('click', () => hide());
+  retry.addEventListener('click', connect);
+  addEventListener('message', e => {
+    if (!frame || e.source !== frame.contentWindow || e.origin !== url.origin) return;
+    const t = e.data && e.data.type;
+    if (t === 'avoice:ready') { ready = true; clearTimeout(timer); state.hidden = true; frame.hidden = false; panel.setAttribute('aria-busy', 'false'); }
+    else if (t === 'avoice:close' || t === 'avoice:escape') hide();
+    else if (t === 'avoice:quick-exit') { try { document.body.style.visibility = 'hidden'; } catch (x) {} location.replace('https://www.google.com/'); }
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && isOpen()) hide(); });
+  addEventListener('resize', () => { if (isOpen()) place(); }, { passive: true });
+  const mini = () => launch.classList.toggle('is-mini', scrollY > 480);
+  addEventListener('scroll', mini, { passive: true }); mini();
+  box.hidden = false;
+})();
