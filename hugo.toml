@@ -22,6 +22,9 @@ disableKinds = ["taxonomy", "term", "rss"]
   shareImage = "/share.jpg"
   # The public address, shown as text on the legal pages (links themselves stay relative).
   address = "https://awdpi.org/"
+  # The Avoice AI assistant (Coze). Its server only lets awdpi.org show it inside a page; on any other address
+  # (such as the GitHub Pages preview) the chat panel offers it in a new tab instead. Remove to hide the chat.
+  chatWidget = "https://rzxfhy9z8w.coze.site/widget"
 
 [security]
   # Pages are written as HTML files (content/**/*.html); Hugo blocks that by default.
