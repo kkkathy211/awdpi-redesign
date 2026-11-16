@@ -98,7 +98,9 @@ country = "United States"
 countryZh = "美国"
 # 按 IRS 认定函（2023-09-08，501(c)(3)）逐字填写
 legalName = "ASIAN WOMEN DEVELOPMENT PLAN INTERNATIONAL US INC"
-state = "California"
+# 注册州是特拉华（Delaware nonprofit nonstock corporation，2023-07-17 成立），见 1023-EZ、章程和董事会书面决议。
+# 加州只是外州公司登记（CA 实体号 5940808，2023-10-17），不是注册州。2026-11-16 由 California 更正。
+state = "Delaware"
 idLabel = "EIN"
 footerLabel = "EIN"
 footerLabelZh = "EIN"
