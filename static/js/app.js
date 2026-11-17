@@ -727,7 +727,7 @@ const headStuck = () => { const h = document.querySelector('.site'); return h ? 
   // The relay appends cached web-search links after this marker; keep them on screen but out of the history.
   const SEARCH_MARK = '\n\n---\n以下是网络搜索';
   const intro = [...log.children];
-  let history = [], busy = false, ctrl = null;
+  let history = [], busy = false, ctrl = null, gen = 0; // gen changes when the chat is cleared
 
   const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
   const scrollDown = () => { log.scrollTop = log.scrollHeight; };
@@ -754,7 +754,7 @@ const headStuck = () => { const h = document.querySelector('.site'); return h ? 
     if (last < text.length) parent.append(text.slice(last));
   };
   const render = (md, host) => {
-    let para = [], top = null, sub = null;
+    let para = [], top = null, sub = null, tbl = null;
     const flush = () => {
       if (!para.length) return;
       const p = el('p'); para.forEach((t, i) => { if (i) p.append(el('br')); inline(t, p); }); host.append(p); para = [];
@@ -762,6 +762,18 @@ const headStuck = () => { const h = document.querySelector('.site'); return h ? 
     for (const raw of md.replace(/\r/g, '').split('\n')) {
       const line = raw.replace(/\s+$/, ''), indent = (raw.match(/^\s*/) || [''])[0].length;
       const bullet = line.match(/^\s*[-*•]\s+(.*)$/), num = line.match(/^\s*(\d+)[.)、]\s+(.*)$/);
+      // Markdown tables become a real table (built with DOM nodes, like everything else).
+      const row = /^\s*\|.*\|\s*$/.test(line);
+      if (!row) tbl = null;
+      else {
+        flush(); top = sub = null;
+        if (/^\s*\|(\s*:?-{2,}:?\s*\|)+\s*$/.test(line)) continue;
+        if (!tbl) { const wrap = el('div', 'chat__table'); tbl = el('table'); wrap.append(tbl); host.append(wrap); }
+        const tr = el('tr');
+        for (const cell of line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|')) { const c = el(tbl.rows.length ? 'td' : 'th'); inline(cell.trim(), c); tr.append(c); }
+        tbl.append(tr);
+        continue;
+      }
       if (!line.trim()) { flush(); top = sub = null; continue; }
       if (/^\s*(-{3,}|\*{3,}|_{3,})$/.test(line)) { flush(); top = sub = null; host.append(el('hr')); continue; }
       if (/^\s*#{1,6}\s+/.test(line)) { flush(); top = sub = null; const p = el('p'), b = el('strong'); inline(line.replace(/^\s*#{1,6}\s+/, ''), b); p.append(b); host.append(p); continue; }
@@ -815,6 +827,7 @@ const headStuck = () => { const h = document.querySelector('.site'); return h ? 
   };
 
   const request = async () => {
+    const mine = gen;
     setBusy(true);
     ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), TIMEOUT);
@@ -829,8 +842,9 @@ const headStuck = () => { const h = document.querySelector('.site'); return h ? 
     } catch (e) {
       res = null;
     } finally {
-      clearTimeout(timer); ctrl = null; setBusy(false);
+      clearTimeout(timer); if (mine === gen) { ctrl = null; setBusy(false); }
     }
+    if (mine !== gen) return; // the chat was cleared while this reply was loading
     if (res && res.ok && typeof data.reply === 'string' && data.reply.trim()) {
       const cut = data.reply.indexOf(SEARCH_MARK);
       history.push({ role: 'assistant', content: (cut >= 0 ? data.reply.slice(0, cut) : data.reply).trim() });
@@ -857,6 +871,7 @@ const headStuck = () => { const h = document.querySelector('.site'); return h ? 
   };
 
   const reset = () => {
+    gen++;
     if (ctrl) ctrl.abort();
     history = []; log.replaceChildren(...intro);
     if (starts) starts.hidden = false;
