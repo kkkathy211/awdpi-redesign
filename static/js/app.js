@@ -1,4 +1,5 @@
-// AWDPI v2 prototype — shared behaviour. No tracking, nothing leaves the browser.
+// AWDPI website — shared behaviour. No tracking. Nothing leaves the browser except chat messages the visitor sends
+// to the Avoice assistant (see "Avoice chat" at the end).
 const STILL = /[?&]still\b/.test(location.search); // screenshot mode: no scroll animations
 if (!STILL) document.documentElement.classList.add('js');
 
@@ -705,81 +706,190 @@ const headStuck = () => { const h = document.querySelector('.site'); return h ? 
   }));
 })();
 
-// Avoice chat, on every page. The launcher opens a panel; the assistant loads in a sandboxed frame and talks to
-// this page with the same messages as awdpi.org. The assistant only lets awdpi.org show it inside a page, so
-// anywhere else (this preview) the panel offers it in a new tab instead. Nothing loads until the panel opens.
+// Avoice chat, on every page. The launcher opens a panel; messages go to the Avoice relay in AWS Stockholm
+// (data-endpoint). The conversation lives only in this page's memory: nothing is written to cookies or browser
+// storage, and it is gone after closing, reloading or leaving the page. Replies are rendered from a small, safe
+// subset of Markdown (paragraphs, lists, bold, links) built with DOM nodes, never innerHTML.
 (() => {
   const box = document.querySelector('[data-chat]'); if (!box) return;
-  const launch = box.querySelector('[data-chat-launch]'), panel = box.querySelector('[data-chat-panel]');
-  const body = box.querySelector('[data-chat-body]'), state = box.querySelector('[data-chat-state]');
-  const status = box.querySelector('[data-chat-status]'), hint = box.querySelector('[data-chat-hint]');
-  const dots = box.querySelector('[data-chat-dots]'), acts = box.querySelector('[data-chat-acts]');
-  const retry = box.querySelector('[data-chat-retry]'), openA = box.querySelector('[data-chat-open]');
-  const closeB = box.querySelector('[data-chat-close]'), d = box.dataset, lang = d.chatLang || 'en';
-  let url;
-  try { url = new URL(d.widget); } catch (e) { return; }
-  if (url.protocol !== 'https:' || url.pathname !== '/widget' || url.origin === location.origin) return;
-  const embedOK = /(^|\.)awdpi\.org$/.test(location.hostname);
-  const tab = new URL(url); tab.searchParams.set('lang', lang);
-  openA.href = tab.href;
-  const openText = openA.textContent;
-  let frame = null, timer = 0, ready = false;
-  const send = type => { try { frame && frame.contentWindow && frame.contentWindow.postMessage({ type, version: 1, lang, parentOrigin: location.origin }, url.origin); } catch (e) {} };
-  const drop = () => { clearTimeout(timer); if (frame) { send('avoice:dispose'); frame.remove(); frame = null; } ready = false; };
-  const setState = (st, hi, busy, withActs) => {
-    state.hidden = false; status.textContent = st; hint.textContent = hi;
-    dots.hidden = !busy; acts.hidden = !withActs; panel.setAttribute('aria-busy', String(busy));
+  const d = box.dataset;
+  let endpoint;
+  try { endpoint = new URL(d.endpoint); } catch (e) { return; }
+  if (endpoint.protocol !== 'https:') return;
+  const q = s => box.querySelector(s);
+  const launch = q('[data-chat-launch]'), panel = q('[data-chat-panel]'), closeB = q('[data-chat-close]');
+  const log = q('[data-chat-log]'), starts = q('[data-chat-starts]'), typing = q('[data-chat-typing]');
+  const input = q('[data-chat-input]'), sendB = q('[data-chat-send]'), clearB = q('[data-chat-clear]'), count = q('[data-chat-count]');
+  const MAX = 1000, KEEP = 16, TIMEOUT = 40000;
+  // The relay appends cached web-search links after this marker; keep them on screen but out of the history.
+  const SEARCH_MARK = '\n\n---\n以下是网络搜索';
+  const intro = [...log.children];
+  let history = [], busy = false, ctrl = null;
+
+  const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+  const scrollDown = () => { log.scrollTop = log.scrollHeight; };
+
+  // Safe Markdown subset -> DOM.
+  const link = (href, label) => {
+    let u; try { u = new URL(href); } catch (e) { return document.createTextNode(label); }
+    if (u.protocol !== 'https:' && u.protocol !== 'http:') return document.createTextNode(label);
+    const a = el('a', null, label); a.href = u.href; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.referrerPolicy = 'no-referrer';
+    return a;
   };
-  const fail = () => {
-    drop();
-    retry.hidden = false; openA.className = 'chat__open'; openA.textContent = openText;
-    setState(d.slow, d.slowHint, false, true);
+  const INLINE = /\*\*([^*]+)\*\*|\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s<>()（）]*[^\s<>()（）.,;:!?，。；：！？、])|`([^`]+)`/g;
+  const inline = (text, parent) => {
+    let last = 0, m; INLINE.lastIndex = 0;
+    const re = new RegExp(INLINE.source, 'g');
+    while ((m = re.exec(text))) {
+      if (m.index > last) parent.append(text.slice(last, m.index));
+      if (m[1] !== undefined) { const b = el('strong'); inline(m[1], b); parent.append(b); }
+      else if (m[2] !== undefined) parent.append(link(m[3], m[2]));
+      else if (m[4] !== undefined) parent.append(link(m[4], m[4]));
+      else parent.append(m[5]);
+      last = re.lastIndex;
+    }
+    if (last < text.length) parent.append(text.slice(last));
   };
-  const preview = () => {
-    retry.hidden = true; openA.className = 'chat__open btn btn--main'; openA.textContent = d.openLabel + ' ↗';
-    setState(d.preview, d.previewHint, false, true);
+  const render = (md, host) => {
+    let para = [], top = null, sub = null;
+    const flush = () => {
+      if (!para.length) return;
+      const p = el('p'); para.forEach((t, i) => { if (i) p.append(el('br')); inline(t, p); }); host.append(p); para = [];
+    };
+    for (const raw of md.replace(/\r/g, '').split('\n')) {
+      const line = raw.replace(/\s+$/, ''), indent = (raw.match(/^\s*/) || [''])[0].length;
+      const bullet = line.match(/^\s*[-*•]\s+(.*)$/), num = line.match(/^\s*(\d+)[.)、]\s+(.*)$/);
+      if (!line.trim()) { flush(); top = sub = null; continue; }
+      if (/^\s*(-{3,}|\*{3,}|_{3,})$/.test(line)) { flush(); top = sub = null; host.append(el('hr')); continue; }
+      if (/^\s*#{1,6}\s+/.test(line)) { flush(); top = sub = null; const p = el('p'), b = el('strong'); inline(line.replace(/^\s*#{1,6}\s+/, ''), b); p.append(b); host.append(p); continue; }
+      if (bullet || num) {
+        flush();
+        const tag = num ? 'ol' : 'ul', text = num ? num[2] : bullet[1], li = el('li');
+        inline(text, li);
+        if (indent >= 2 && top && top.lastElementChild) {
+          if (!sub || sub.tagName.toLowerCase() !== tag || sub.parentElement !== top.lastElementChild) { sub = el(tag); top.lastElementChild.append(sub); }
+          sub.append(li);
+        } else {
+          if (!top || top.tagName.toLowerCase() !== tag) { top = el(tag); if (num && num[1] !== '1') top.start = Number(num[1]); host.append(top); }
+          sub = null; top.append(li);
+        }
+        continue;
+      }
+      if (top && indent >= 2 && top.lastElementChild) { const li = (sub && sub.lastElementChild) || top.lastElementChild; li.append(el('br')); inline(line.trim(), li); continue; }
+      top = sub = null; para.push(line.trim());
+    }
+    flush();
   };
-  const connect = () => {
-    drop();
-    if (!embedOK) { preview(); return; }
-    setState(d.connecting, d.connectingHint, true, false);
-    const src = new URL(url); src.searchParams.set('lang', lang); src.searchParams.set('parentOrigin', location.origin);
-    frame = document.createElement('iframe');
-    frame.className = 'chat__frame'; frame.title = d.frameTitle; frame.hidden = true;
-    frame.setAttribute('sandbox', 'allow-scripts allow-same-origin');
-    frame.setAttribute('allow', "camera 'none'; microphone 'none'; geolocation 'none'; autoplay 'none'");
-    frame.referrerPolicy = 'no-referrer';
-    frame.addEventListener('load', () => send('avoice:init'));
-    frame.src = src.href;
-    body.appendChild(frame);
-    timer = setTimeout(() => { if (!ready) fail(); }, 15000);
+
+  const bubble = (role, text) => {
+    const m = el('div', 'chat__msg chat__msg--' + role);
+    m.append(el('span', 'sr-only', role === 'user' ? d.you : d.bot));
+    if (role === 'bot') render(text, m); else m.append(el('p', null, text));
+    log.append(m); scrollDown(); return m;
   };
-  const place = () => box.style.setProperty('--chat-top', (headStuck() + 8) + 'px');
+  const note = (text, onRetry) => {
+    const n = el('div', 'chat__note');
+    render(text, n);
+    if (onRetry) { const b = el('button', 'chat__retry', d.retry); b.type = 'button'; b.addEventListener('click', () => { n.remove(); onRetry(); }); n.append(b); }
+    log.append(n); scrollDown();
+  };
+
+  const setBusy = on => {
+    busy = on; typing.hidden = !on; panel.setAttribute('aria-busy', String(on));
+    sendB.disabled = on || !input.value.trim(); if (on) scrollDown();
+  };
+  const sync = () => {
+    const n = input.value.length;
+    sendB.disabled = busy || !input.value.trim();
+    count.textContent = n > MAX * 0.8 ? n + ' / ' + MAX : '';
+    input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 132) + 'px';
+  };
+
+  const request = async () => {
+    setBusy(true);
+    ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), TIMEOUT);
+    let res = null, data = {};
+    try {
+      res = await fetch(endpoint.href, {
+        method: 'POST', mode: 'cors', credentials: 'omit', cache: 'no-store', referrerPolicy: 'no-referrer',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lang: d.lang, messages: history.slice(-KEEP) }), signal: ctrl.signal,
+      });
+      try { data = await res.json(); } catch (e) { data = {}; }
+    } catch (e) {
+      res = null;
+    } finally {
+      clearTimeout(timer); ctrl = null; setBusy(false);
+    }
+    if (res && res.ok && typeof data.reply === 'string' && data.reply.trim()) {
+      const cut = data.reply.indexOf(SEARCH_MARK);
+      history.push({ role: 'assistant', content: (cut >= 0 ? data.reply.slice(0, cut) : data.reply).trim() });
+      bubble('bot', data.reply);
+      return;
+    }
+    if (!res) { note(d.errNetwork, request); return; }
+    if (res.status === 429) { note(data.message || d.errRate, request); return; }
+    if (res.status === 413) { history.pop(); note(d.errLong); return; }
+    if (res.status === 403) { note(d.errOrigin); return; }
+    note(data.message || d.errDown, request);
+  };
+
+  const send = text => {
+    text = (text || '').trim();
+    if (!text || busy) return;
+    if (text.length > MAX) { note(d.errLong); return; }
+    if (starts) starts.hidden = true;
+    clearB.hidden = false;
+    history.push({ role: 'user', content: text });
+    bubble('user', text);
+    input.value = ''; sync();
+    request();
+  };
+
+  const reset = () => {
+    if (ctrl) ctrl.abort();
+    history = []; log.replaceChildren(...intro);
+    if (starts) starts.hidden = false;
+    clearB.hidden = true; input.value = ''; sync(); setBusy(false);
+  };
+
+  sendB.addEventListener('click', () => send(input.value));
+  input.addEventListener('input', sync);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); send(input.value); }
+  });
+  box.querySelectorAll('[data-chat-start]').forEach(b => b.addEventListener('click', () => send(b.textContent)));
+  clearB.addEventListener('click', () => { reset(); input.focus(); });
+  // A page restored from the back/forward cache must not show an earlier conversation.
+  addEventListener('pageshow', e => { if (e.persisted) reset(); });
+
+  // --chat-kb lifts the panel above an on-screen keyboard (phones), so the message box stays visible.
+  const place = () => {
+    box.style.setProperty('--chat-top', (headStuck() + 8) + 'px');
+    const v = window.visualViewport;
+    box.style.setProperty('--chat-kb', (v ? Math.max(0, Math.round(innerHeight - v.height - v.offsetTop)) : 0) + 'px');
+  };
   const isOpen = () => !panel.hidden;
   const show = () => {
     place(); panel.hidden = false; launch.setAttribute('aria-expanded', 'true'); document.documentElement.classList.add('chat-open');
-    if (!frame) connect();
-    setTimeout(() => { (ready && frame ? frame : closeB).focus({ preventScroll: true }); }, 30);
+    scrollDown(); setTimeout(() => input.focus({ preventScroll: true }), 30);
   };
   const hide = (back = true) => {
     if (!isOpen()) return;
     panel.hidden = true; launch.setAttribute('aria-expanded', 'false'); document.documentElement.classList.remove('chat-open');
-    drop();
     if (back) launch.focus({ preventScroll: true });
   };
   launch.addEventListener('click', () => (isOpen() ? hide() : show()));
   closeB.addEventListener('click', () => hide());
-  retry.addEventListener('click', connect);
-  addEventListener('message', e => {
-    if (!frame || e.source !== frame.contentWindow || e.origin !== url.origin) return;
-    const t = e.data && e.data.type;
-    if (t === 'avoice:ready') { ready = true; clearTimeout(timer); state.hidden = true; frame.hidden = false; panel.setAttribute('aria-busy', 'false'); }
-    else if (t === 'avoice:close' || t === 'avoice:escape') hide();
-    else if (t === 'avoice:quick-exit') { try { document.body.style.visibility = 'hidden'; } catch (x) {} location.replace('https://www.google.com/'); }
-  });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && isOpen()) hide(); });
   addEventListener('resize', () => { if (isOpen()) place(); }, { passive: true });
+  if (window.visualViewport) {
+    visualViewport.addEventListener('resize', () => { if (isOpen()) { place(); scrollDown(); } });
+    visualViewport.addEventListener('scroll', () => { if (isOpen()) place(); });
+  }
   const mini = () => launch.classList.toggle('is-mini', scrollY > 480);
   addEventListener('scroll', mini, { passive: true }); mini();
+  sync();
   box.hidden = false;
 })();

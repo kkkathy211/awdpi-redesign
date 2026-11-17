@@ -4,12 +4,16 @@
 # Keep "What happens when you visit" in step with what the site actually loads. Before launch:
 # when the "Write to us" form on the Support us page is connected, add the service that delivers it.
 # The Chinese version (content/zh-cn/privacy.md) is a translation; keep both in step.
+# "The Avoice AI assistant" (added 2026-11-16) must be confirmed before launch: which AWDPI organisation operates
+# the assistant and holds the AWS account (the Avoice plan names AWDPI Belgium, while this page names AWDPI United
+# Kingdom as the website's controller); the UK GDPR Article 9 condition for sensitive information in messages; and
+# a DPIA. Keep it in step with the relay (repository awdp-avoice/avoice-chat-relay).
 title: Privacy
 headTitle: Privacy | AWDPI
 description: "How the AWDPI organisations handle personal information, and how awdpi.org handles information about visitors."
 type: legal
 layout: prose
-lastUpdated: "2026-11-15"
+lastUpdated: "2026-11-16"
 ---
 AWDPI is an international network of independently registered non-profit organisations. Each organisation decides how it uses the personal information it collects, is responsible for it under the law of its own country, and has its own privacy notice:
 
@@ -35,7 +39,20 @@ We use this information only to run a working, secure website. Our lawful basis 
 
 Because we do not track visitors, the website works the same way whether or not your browser sends a "Do Not Track" or "Global Privacy Control" signal.
 
+## The Avoice AI assistant {#the-avoice-ai-assistant}
+
+Every page has a chat window with the Avoice AI assistant. It is an automated service, not a person. It can explain the support AWDPI offers and point you to help services in your country. It does not give legal, medical or psychological advice and is not an emergency service.
+
+- **What is sent.** When you send a message, your browser sends the conversation shown in the window (up to the last eight exchanges) to our service in the Amazon Web Services (AWS) data centre in Stockholm, Sweden. The service adds information from AWDPI's directory of help services and passes the conversation to an AI model (DeepSeek, run by AWS in the same region) to write the reply.
+- **What is kept.** Nothing. The conversation exists only in the open page and is gone when you close, reload or leave it. We do not store your messages or the replies, do not record them in our logs, and have set the AI model service not to retain them. Our service keeps only counts, such as how many messages were answered and what they cost, and, for a few minutes, an irreversibly scrambled (hashed) form of your IP address to stop the service being flooded.
+- **Web search.** Some replies end with links found by a monthly web search for public help services. The search uses only fixed terms, such as a city and a kind of service. It never includes anything you write and is not run when you ask a question.
+- **Please do not share details that identify you**, such as your name, address or ID numbers. If you choose to describe what happened to you, your messages may include sensitive information, for example about your health or about violence against you. We use it only to reply to you and do not keep it.
+
+AWS acts as our processor under a data processing agreement. Our lawful basis for running the assistant is our legitimate interest in giving people information about support (UK GDPR Article 6(1)(f)).
+
 ## Transfers outside the United Kingdom
+
+The AI assistant runs in Sweden, in the European Economic Area. UK regulations approve transfers of personal data to the European Economic Area.
 
 GitHub and Google are based in the United States. Both are certified under the Data Privacy Framework, and UK regulations approve transfers of personal data to certified US companies (the UK–US "data bridge").
 

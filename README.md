@@ -68,6 +68,8 @@ static/
 
 **开通某个国家的捐赠**：在 `data/donate.toml` 里把这个国家的 `status` 改成 `"open"`，把捐赠工具（例如美国的 Givebutter）给的嵌入代码粘贴到 `embed`，外部公益平台的活动（例如 GoFundMe）加到 `campaigns`。文件开头列了开通前要做的事，包括更新隐私声明。页面上的"捐赠须知"在 `content/<语言>/donate/<国家>.md`，由各主体提供合规写法；中文页下方会自动附上英文原文。
 
+**改 Avoice 聊天窗口**：结构在 `layouts/_partials/chat.html`，文字在 `i18n/`（以 `chat` 开头），样式和脚本在 `static/css/style.css` 和 `static/js/app.js` 的"Avoice chat"部分。聊天发送到 `hugo.toml` 里 `chatEndpoint` 指定的 Avoice 中转服务（AWS 斯德哥尔摩，仓库 `awdp-avoice/avoice-chat-relay`），对话只保存在当前页面里，不写 Cookie 或浏览器存储。中转服务只接受它列出的网址（awdpi.org、本预览站和本地预览）。旧网站的聊天窗口是从这里移植的，改动后要同步到 `avoice-site-hugo`。
+
 **加一篇文章**：在 `content/stories/` 新建 `<名称>.html`（或 `.md`），图片放进 `static/media/stories/<名称>/`：
 
 ```
@@ -91,5 +93,6 @@ image: /media/stories/<名称>/cover.webp
 4. 隐私声明写明的存储地点要先落实：英国和比利时机构的邮件和个案记录存放在欧盟，美国机构的存放在美国，澳大利亚机构的存放在澳大利亚。
 5. 各国隐私声明（`content/en/<id>/privacy.md`）开头注释里列出的事项，由各机构逐项确认，包括保存期限和回复时限。
 6. "支持我们"页的留言表单接通后，在隐私页（`content/en/privacy.md` 和中文版）写明投递留言的服务。
+7. 隐私页"Avoice AI 助手"一节开头注释里列出的事项要确认：由哪家机构运营助手和持有 AWS 账号、UK GDPR 第 9 条的处理条件、DPIA。
 
 整站约 1.3 GB，其中文章图片约 1.1 GB（旧网站发布的内容约 1.5 GB）。

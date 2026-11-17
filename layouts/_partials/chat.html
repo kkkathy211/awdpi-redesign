@@ -1,11 +1,14 @@
 {{- /* The Avoice AI assistant, on every page. A round launcher bottom right (with its name until the visitor scrolls on)
-   opens a panel with Quick exit, an emergency line and the WeChat ID for a real person. The assistant itself loads in a
-   sandboxed frame, using the same messages as the current awdpi.org widget (static/js/app.js, "Avoice chat").
-   The widget only lets awdpi.org show it inside a page; anywhere else the panel offers it in a new tab instead. */ -}}
-{{- with site.Params.chatWidget }}
+   opens a panel with Quick exit, an emergency line, the chat itself and the WeChat ID for a real person.
+   static/js/app.js ("Avoice chat") sends the conversation to the Avoice relay in AWS Stockholm
+   (repository awdp-avoice/avoice-chat-relay). The conversation exists only in this page's memory: nothing goes to
+   cookies or browser storage, and it is gone when the visitor closes, reloads or leaves the page.
+   The relay only answers the origins it lists (awdpi.org, the GitHub Pages preview and local previews). */ -}}
+{{- with site.Params.chatEndpoint }}
 {{- $bubble := `<svg class="chat__ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8A8.5 8.5 0 0 1 12.5 20a8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7A8.4 8.4 0 0 1 4 11.5a8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8z"/><path d="M8.5 11.5h.01M12.5 11.5h.01M16.5 11.5h.01"/></svg>` | safeHTML }}
 {{- $x := `<svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>` | safeHTML }}
-<div class="chat" data-chat data-widget="{{ . }}" data-chat-lang="{{ site.Language.Locale }}" data-connecting="{{ T "chatConnecting" }}" data-connecting-hint="{{ T "chatConnectingHint" }}" data-slow="{{ T "chatSlow" }}" data-slow-hint="{{ T "chatSlowHint" }}" data-preview="{{ T "chatPreview" }}" data-preview-hint="{{ T "chatPreviewHint" }}" data-open-label="{{ T "chatOpenLabel" }}" data-frame-title="{{ T "chatFrameTitle" }}" hidden>
+{{- $send := `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg>` | safeHTML }}
+<div class="chat" data-chat data-endpoint="{{ . }}" data-lang="{{ site.Language.Lang }}" data-typing="{{ T "chatTyping" }}" data-err-network="{{ T "chatErrNetwork" }}" data-err-rate="{{ T "chatErrRate" }}" data-err-long="{{ T "chatErrLong" }}" data-err-origin="{{ T "chatErrOrigin" }}" data-err-down="{{ T "chatErrDown" }}" data-retry="{{ T "chatRetry" }}" data-you="{{ T "chatYou" }}" data-bot="{{ T "chatBot" }}" hidden>
   <button class="chat__launch" type="button" aria-controls="chat-panel" aria-expanded="false" aria-haspopup="dialog" data-chat-launch>
     <span class="chat__av" aria-hidden="true">{{ $bubble }}{{ $x }}</span><span class="chat__lt"><b>{{ T "chatLaunch" }}</b><small>{{ T "chatLaunchSub" }}</small></span>
   </button>
@@ -18,14 +21,21 @@
     </header>
     <p class="chat__safe">{{ T "chatSafe" }}</p>
     <div class="chat__body" data-chat-body>
-      <div class="chat__state" data-chat-state>
-        <span class="chat__big" aria-hidden="true">{{ $bubble }}</span>
-        <span class="chat__dots" aria-hidden="true" data-chat-dots><i></i><i></i><i></i></span>
-        <p class="chat__status" role="status" aria-live="polite" data-chat-status>{{ T "chatConnecting" }}</p>
-        <p class="chat__hint" data-chat-hint>{{ T "chatConnectingHint" }}</p>
-        <div class="chat__acts" data-chat-acts hidden><button class="btn btn--main" type="button" data-chat-retry>{{ T "chatRetry" }}</button><a class="chat__open" target="_blank" rel="noopener noreferrer" data-chat-open>{{ T "chatOpenTab" }} ↗</a></div>
+      <div class="chat__log" role="log" aria-live="polite" aria-relevant="additions" data-chat-log>
+        <p class="chat__notice">{{ T "chatNotice" }} <a href="{{ "privacy/" | relLangURL }}#the-avoice-ai-assistant">{{ T "chatPrivacy" }}</a></p>
+        <div class="chat__msg chat__msg--bot"><span class="sr-only">{{ T "chatBot" }}</span><p>{{ T "chatHello" }}</p></div>
+        <div class="chat__starts" data-chat-starts>
+          {{- range slice "chatStart1" "chatStart2" "chatStart3" "chatStart4" }}<button type="button" data-chat-start>{{ T . }}</button>{{ end -}}
+        </div>
       </div>
+      <p class="chat__typing" data-chat-typing hidden><span class="chat__dots" aria-hidden="true"><i></i><i></i><i></i></span><span>{{ T "chatTyping" }}</span></p>
     </div>
+    <div class="chat__compose">
+      <label class="sr-only" for="chat-input">{{ T "chatPlaceholder" }}</label>
+      <textarea id="chat-input" rows="1" maxlength="1000" placeholder="{{ T "chatPlaceholder" }}" autocomplete="off" enterkeyhint="send" data-chat-input></textarea>
+      <button class="chat__send" type="button" aria-label="{{ T "chatSend" }}" data-chat-send disabled>{{ $send }}</button>
+    </div>
+    <div class="chat__tools"><span class="chat__count" data-chat-count aria-live="polite"></span><button class="chat__clear" type="button" data-chat-clear hidden>{{ T "chatClear" }}</button></div>
     <p class="chat__foot">{{ T "chatPerson" | safeHTML }}</p>
   </section>
 </div>

@@ -22,9 +22,10 @@ disableKinds = ["taxonomy", "term", "rss"]
   shareImage = "/share.jpg"
   # The public address, shown as text on the legal pages (links themselves stay relative).
   address = "https://awdpi.org/"
-  # The Avoice AI assistant (Coze). Its server only lets awdpi.org show it inside a page; on any other address
-  # (such as the GitHub Pages preview) the chat panel offers it in a new tab instead. Remove to hide the chat.
-  chatWidget = "https://rzxfhy9z8w.coze.site/widget"
+  # The Avoice AI assistant. The chat panel sends the conversation to the Avoice relay in AWS Stockholm
+  # (repository awdp-avoice/avoice-chat-relay), which only answers the origins it lists: awdpi.org, www.awdpi.org,
+  # the GitHub Pages preview and local previews on ports 8765 and 8790. Remove to hide the chat.
+  chatEndpoint = "https://0p5gm3p4n0.execute-api.eu-north-1.amazonaws.com/prod/v1/chat"
 
 [security]
   # Pages are written as HTML files (content/**/*.html); Hugo blocks that by default.
