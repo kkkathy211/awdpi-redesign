@@ -68,7 +68,7 @@ static/
 
 **开通某个国家的捐赠**：在 `data/donate.toml` 里把这个国家的 `status` 改成 `"open"`，把捐赠工具（例如美国的 Givebutter）给的嵌入代码粘贴到 `embed`，外部公益平台的活动（例如 GoFundMe）加到 `campaigns`。文件开头列了开通前要做的事，包括更新隐私声明。页面上的"捐赠须知"在 `content/<语言>/donate/<国家>.md`，由各主体提供合规写法；中文页下方会自动附上英文原文。
 
-**改 Avoice 聊天窗口**：结构在 `layouts/_partials/chat.html`，文字在 `i18n/`（以 `chat` 开头），样式和脚本在 `static/css/style.css` 和 `static/js/app.js` 的"Avoice chat"部分。聊天发送到 `hugo.toml` 里 `chatEndpoint` 指定的 Avoice 中转服务（AWS 斯德哥尔摩，仓库 `awdp-avoice/avoice-chat-relay`），对话只保存在当前页面里，不写 Cookie 或浏览器存储。中转服务只接受它列出的网址（awdpi.org、本预览站和本地预览）。旧网站的聊天窗口是从这里移植的，改动后要同步到 `avoice-site-hugo`。
+**改 Avoice 聊天窗口**：结构在 `layouts/_partials/chat.html`，文字在 `i18n/`（以 `chat` 开头），样式和脚本在 `static/css/style.css` 和 `static/js/app.js` 的"Avoice chat"部分。聊天发送到 `hugo.toml` 里 `chatEndpoint` 指定的 Avoice 中转服务（AWS 斯德哥尔摩，仓库 `awdp-avoice/avoice-chat-relay`），对话只保存在当前页面里，不写 Cookie 或浏览器存储。中转服务只接受它列出的网址（awdpi.org、本预览站和本地预览）。独立聊天页是 `content/<lang>/chat.html`（front matter 里 `chatPage: true`），聊天在这个页面上铺满窗口；小窗右上角的展开按钮会让聊天铺满窗口并把地址换成这个页面，对话保留，返回键回到小窗。旧网站的聊天窗口是从这里移植的，改动后要同步到 `avoice-site-hugo`。
 
 **加一篇文章**：在 `content/stories/` 新建 `<名称>.html`（或 `.md`），图片放进 `static/media/stories/<名称>/`：
 

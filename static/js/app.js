@@ -710,6 +710,8 @@ const headStuck = () => { const h = document.querySelector('.site'); return h ? 
 // (data-endpoint). The conversation lives only in this page's memory: nothing is written to cookies or browser
 // storage, and it is gone after closing, reloading or leaving the page. Replies are rendered from a small, safe
 // subset of Markdown (paragraphs, lists, bold, links) built with DOM nodes, never innerHTML.
+// The expand button turns the panel into a full-window page at the chat page's address; on the chat page itself
+// (data-chat-page) the chat always fills the window.
 (() => {
   const box = document.querySelector('[data-chat]'); if (!box) return;
   const d = box.dataset;
@@ -718,6 +720,7 @@ const headStuck = () => { const h = document.querySelector('.site'); return h ? 
   if (endpoint.protocol !== 'https:') return;
   const q = s => box.querySelector(s);
   const launch = q('[data-chat-launch]'), panel = q('[data-chat-panel]'), closeB = q('[data-chat-close]');
+  const expandA = q('[data-chat-expand]'), shrinkB = q('[data-chat-shrink]');
   const log = q('[data-chat-log]'), starts = q('[data-chat-starts]'), typing = q('[data-chat-typing]');
   const input = q('[data-chat-input]'), sendB = q('[data-chat-send]'), clearB = q('[data-chat-clear]'), count = q('[data-chat-count]');
   const MAX = 1000, KEEP = 16, TIMEOUT = 40000;
@@ -802,7 +805,13 @@ const headStuck = () => { const h = document.querySelector('.site'); return h ? 
     const n = input.value.length;
     sendB.disabled = busy || !input.value.trim();
     count.textContent = n > MAX * 0.8 ? n + ' / ' + MAX : '';
-    input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 132) + 'px';
+    if (panel.hidden) return;
+    // The box grows with the text up to its CSS max-height and only then scrolls. scrollHeight leaves out the
+    // borders, so they are added back; otherwise the box is a little too short and shows a scrollbar.
+    input.style.height = 'auto';
+    const need = input.scrollHeight + input.offsetHeight - input.clientHeight, cap = parseFloat(getComputedStyle(input).maxHeight) || 132;
+    input.style.height = Math.min(need, cap) + 'px';
+    input.style.overflowY = need > cap + 1 ? 'auto' : 'hidden';
   };
 
   const request = async () => {
@@ -873,15 +882,49 @@ const headStuck = () => { const h = document.querySelector('.site'); return h ? 
   const isOpen = () => !panel.hidden;
   const show = () => {
     place(); panel.hidden = false; launch.setAttribute('aria-expanded', 'true'); document.documentElement.classList.add('chat-open');
-    scrollDown(); setTimeout(() => input.focus({ preventScroll: true }), 30);
+    sync(); scrollDown(); setTimeout(() => input.focus({ preventScroll: true }), 30);
   };
+
+  // Full window. Expanding moves the address to the chat page (pushState: same page, so the conversation stays and
+  // nothing is stored), so Back returns to the small panel and a reload opens the chat page. "history" above is the
+  // conversation, hence window.history here.
+  const onPage = 'chatPage' in d, pageTitle = document.title;
+  let pushed = false;
+  const isFull = () => box.classList.contains('is-full');
+  const setFull = on => {
+    box.classList.toggle('is-full', on); document.documentElement.classList.toggle('chat-full', on);
+    panel.setAttribute('aria-modal', String(on));
+    if (expandA) expandA.hidden = on;
+    if (shrinkB) shrinkB.hidden = !on;
+    if (!onPage) document.title = on && d.pageTitle ? d.pageTitle : pageTitle;
+    sync(); scrollDown();
+  };
+  const shrink = () => {
+    if (!isFull() || onPage) return;
+    setFull(false);
+    if (pushed) { pushed = false; window.history.back(); }
+  };
+  if (expandA) expandA.addEventListener('click', e => {
+    if (e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; // a new tab or window opens the chat page
+    e.preventDefault();
+    setFull(true); input.focus({ preventScroll: true });
+    if (!pushed && location.href !== expandA.href) { window.history.pushState({ avoiceChat: 1 }, '', expandA.href); pushed = true; }
+  });
+  if (shrinkB) shrinkB.addEventListener('click', () => { shrink(); input.focus({ preventScroll: true }); });
+  addEventListener('popstate', e => {
+    const full = !!(e.state && e.state.avoiceChat);
+    if (full && !isFull()) { pushed = true; if (!isOpen()) show(); setFull(true); }
+    else if (!full && pushed) { pushed = false; setFull(false); }
+  });
+
   const hide = (back = true) => {
-    if (!isOpen()) return;
+    if (!isOpen() || onPage) return;
+    shrink();
     panel.hidden = true; launch.setAttribute('aria-expanded', 'false'); document.documentElement.classList.remove('chat-open');
     if (back) launch.focus({ preventScroll: true });
   };
   launch.addEventListener('click', () => (isOpen() ? hide() : show()));
-  closeB.addEventListener('click', () => hide());
+  if (closeB) closeB.addEventListener('click', () => hide());
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && isOpen()) hide(); });
   addEventListener('resize', () => { if (isOpen()) place(); }, { passive: true });
   if (window.visualViewport) {
@@ -892,4 +935,5 @@ const headStuck = () => { const h = document.querySelector('.site'); return h ? 
   addEventListener('scroll', mini, { passive: true }); mini();
   sync();
   box.hidden = false;
+  if (onPage) { show(); setFull(true); }
 })();

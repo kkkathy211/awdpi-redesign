@@ -1,14 +1,22 @@
 {{- /* The Avoice AI assistant, on every page. A round launcher bottom right (with its name until the visitor scrolls on)
    opens a panel with Quick exit, an emergency line, the chat itself and the WeChat ID for a real person.
+   The expand button turns the panel into a page of its own at the chat page's address (content/<lang>/chat.html,
+   front matter chatPage: true), keeping the conversation; on the chat page itself the chat always fills the window
+   and a home button takes the place of close.
    static/js/app.js ("Avoice chat") sends the conversation to the Avoice relay in AWS Stockholm
    (repository awdp-avoice/avoice-chat-relay). The conversation exists only in this page's memory: nothing goes to
    cookies or browser storage, and it is gone when the visitor closes, reloads or leaves the page.
    The relay only answers the origins it lists (awdpi.org, the GitHub Pages preview and local previews). */ -}}
+{{- $onPage := .Params.chatPage }}
+{{- $chatPage := site.GetPage "/chat" }}
 {{- with site.Params.chatEndpoint }}
 {{- $bubble := `<svg class="chat__ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8A8.5 8.5 0 0 1 12.5 20a8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7A8.4 8.4 0 0 1 4 11.5a8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8z"/><path d="M8.5 11.5h.01M12.5 11.5h.01M16.5 11.5h.01"/></svg>` | safeHTML }}
 {{- $x := `<svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>` | safeHTML }}
+{{- $expand := `<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h4v4M13.5 2.5l-4 4M6.5 13.5h-4v-4M2.5 13.5l4-4"/></svg>` | safeHTML }}
+{{- $shrink := `<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.5 2.5l-4 4M9.5 3v3.5H13M2.5 13.5l4-4M3 9.5h3.5V13"/></svg>` | safeHTML }}
+{{- $home := `<svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7.5 8 2.5l6 5M3.8 6.2v7.3h3V10h2.4v3.5h3V6.2"/></svg>` | safeHTML }}
 {{- $send := `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg>` | safeHTML }}
-<div class="chat" data-chat data-endpoint="{{ . }}" data-lang="{{ site.Language.Lang }}" data-typing="{{ T "chatTyping" }}" data-err-network="{{ T "chatErrNetwork" }}" data-err-rate="{{ T "chatErrRate" }}" data-err-long="{{ T "chatErrLong" }}" data-err-origin="{{ T "chatErrOrigin" }}" data-err-down="{{ T "chatErrDown" }}" data-retry="{{ T "chatRetry" }}" data-you="{{ T "chatYou" }}" data-bot="{{ T "chatBot" }}" hidden>
+<div class="chat" data-chat data-endpoint="{{ . }}" data-lang="{{ site.Language.Lang }}" data-typing="{{ T "chatTyping" }}" data-err-network="{{ T "chatErrNetwork" }}" data-err-rate="{{ T "chatErrRate" }}" data-err-long="{{ T "chatErrLong" }}" data-err-origin="{{ T "chatErrOrigin" }}" data-err-down="{{ T "chatErrDown" }}" data-retry="{{ T "chatRetry" }}" data-you="{{ T "chatYou" }}" data-bot="{{ T "chatBot" }}"{{ with $chatPage }} data-page-title="{{ .Params.headTitle | default (printf "%s | AWDPI" .Title) }}"{{ end }}{{ if $onPage }} data-chat-page{{ end }} hidden>
   <button class="chat__launch" type="button" aria-controls="chat-panel" aria-expanded="false" aria-haspopup="dialog" data-chat-launch>
     <span class="chat__av" aria-hidden="true">{{ $bubble }}{{ $x }}</span><span class="chat__lt"><b>{{ T "chatLaunch" }}</b><small>{{ T "chatLaunchSub" }}</small></span>
   </button>
@@ -17,7 +25,15 @@
       <span class="chat__av chat__av--sm" aria-hidden="true">{{ $bubble }}</span>
       <div class="chat__ht"><h2 id="chat-title">Avoice</h2><span>{{ T "chatNotPerson" }}</span></div>
       <a class="chat__exit" href="https://www.google.com/" data-quick-exit>{{ T "quickExit" }}</a>
-      <button class="chat__close" type="button" aria-label="{{ T "chatClose" }}" data-chat-close>{{ $x }}</button>
+      {{- with $chatPage }}{{ if not $onPage }}
+      <a class="chat__btn" href="{{ .RelPermalink }}" aria-label="{{ T "chatExpand" }}" title="{{ T "chatExpand" }}" data-chat-expand>{{ $expand }}</a>
+      <button class="chat__btn" type="button" aria-label="{{ T "chatShrink" }}" title="{{ T "chatShrink" }}" data-chat-shrink hidden>{{ $shrink }}</button>
+      {{- end }}{{ end }}
+      {{- if $onPage }}
+      <a class="chat__btn" href="{{ "/" | relLangURL }}" aria-label="{{ T "chatHome" }}" title="{{ T "chatHome" }}">{{ $home }}</a>
+      {{- else }}
+      <button class="chat__btn" type="button" aria-label="{{ T "chatClose" }}" title="{{ T "chatClose" }}" data-chat-close>{{ $x }}</button>
+      {{- end }}
     </header>
     <p class="chat__safe">{{ T "chatSafe" }}</p>
     <div class="chat__body" data-chat-body>
