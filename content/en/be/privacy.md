@@ -152,7 +152,7 @@ If you are in immediate danger in Belgium, call 112.
 
 You can also call the domestic violence helplines: 0800 30 030 (in French) or 1712 (in Dutch).
 
-The **Quick exit** button at the top of every page takes you straight to Google, and so does pressing Esc twice. Leaving a page this way does not erase it from your browser history, so if someone else uses your device, consider using a private window or clearing your history.
+The **Quick exit** button in the bottom-right corner of every page takes you straight to Google, and so does pressing Esc twice. Leaving a page this way does not erase it from your browser history, so if someone else uses your device, consider using a private window or clearing your history.
 
 ## Changes to this notice
 

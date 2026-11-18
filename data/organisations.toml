@@ -66,9 +66,11 @@ legalForm = "Association internationale sans but lucratif (AISBL)"
 legalFormShort = "AISBL"        # 用在 "an independent international non-profit association (AISBL)" 这句
 # 法律形式的英文说明；法文原文（legalForm）保持不变
 legalFormEnglish = "international non-profit association under Belgian law"
-idLabel = "Enterprise number"
-footerLabel = "enterprise no."
-footerLabelZh = "企业编号"
+# 比利时 KBO/BCE 号码在官方名称里叫 enterprise number（企业编号），但所有法人包括非营利社团都有这个号。
+# 页面上统一写成"登记号"并标明非营利社团，免得读者以为 AWDPI 是公司（2026-11-18 志愿者反馈）
+idLabel = "Registration number"
+footerLabel = "non-profit association, reg. no."
+footerLabelZh = "非营利社团，登记号"
 registrationNumber = "1011.855.795"
 rpm = "RPM Bruxelles"           # 法人登记册 + 法院所在地
 registeredAddress = "Chée de Roodebeek 206, 1200 Woluwe-Saint-Lambert"
@@ -102,8 +104,8 @@ legalName = "ASIAN WOMEN DEVELOPMENT PLAN INTERNATIONAL US INC"
 # 加州只是外州公司登记（CA 实体号 5940808，2023-10-17），不是注册州。2026-11-16 由 California 更正。
 state = "Delaware"
 idLabel = "EIN"
-footerLabel = "EIN"
-footerLabelZh = "EIN"
+footerLabel = "501(c)(3) nonprofit, EIN"
+footerLabelZh = "501(c)(3) 非营利组织，EIN"
 registrationNumber = "93-2511417"
 # 按 IRS Tax Exempt Organization Search 里的邮寄地址逐字填写
 registeredAddress = "1060 Lincoln Ave Suite 20 1127, San Jose, CA 95125"

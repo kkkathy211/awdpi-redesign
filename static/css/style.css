@@ -101,20 +101,26 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 /* Get Help stays plain text too, set in red so it is easy to find */
 .nav__links a.nav__help { color: var(--red-d); font-weight: 600; }
 .nav__links a.nav__help::after { background: var(--red); }
-/* Quick exit: the one filled button; "or press Esc twice" shows under it on hover or keyboard focus */
-.exit {
-  grid-area: exit; position: relative; display: inline-flex; align-items: center; gap: 9px; white-space: nowrap;
-  background: var(--red-d); color: #fff; text-decoration: none; font: 600 14px/1 var(--f-t);
-  padding: 7px 16px 7px 7px; border-radius: 999px; box-shadow: 0 4px 14px rgba(160, 25, 18, .22); transition: background .2s, transform .15s, box-shadow .2s;
+/* Quick exit: fixed bottom right on every page (layouts/_partials/quick-exit.html), the one red button, always in reach
+   while scrolling. Where there is a keyboard it says "or press Esc twice" under its name. The chat launcher sits above it. */
+.qx {
+  position: fixed; right: max(20px, env(safe-area-inset-right)); bottom: calc(20px + env(safe-area-inset-bottom)); z-index: 70;
+  display: inline-flex; align-items: center; gap: 10px; padding: 7px 18px 7px 7px; border-radius: 999px;
+  background: var(--red-d); color: #fff; text-decoration: none; white-space: nowrap;
+  box-shadow: 0 10px 28px rgba(160, 25, 18, .28), 0 0 0 1px rgba(255, 255, 255, .5); transition: background .2s, transform .15s, box-shadow .2s;
 }
-.exit > i { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: rgba(255, 255, 255, .18); }
-.exit > i svg { width: 11px; height: 11px; }
-.exit:hover { background: #8f150f; box-shadow: 0 6px 18px rgba(160, 25, 18, .3); }
-.exit:active { transform: scale(.97); }
-.exit__tip { position: absolute; top: calc(100% + 10px); right: 0; padding: 8px 11px; border-radius: 10px; background: var(--ink); color: #fff; font: 500 12.5px/1 var(--f-t); white-space: nowrap; opacity: 0; transform: translateY(-4px); pointer-events: none; transition: opacity .2s, transform .25s var(--ease); }
-.exit__tip::before { content: ""; position: absolute; right: 22px; top: -4px; width: 9px; height: 9px; background: inherit; border-radius: 2px; transform: rotate(45deg); }
-.exit__tip kbd { font: 600 11.5px/1 var(--f-t); padding: 3px 6px; margin: 0 2px; border-radius: 5px; background: rgba(255, 255, 255, .16); }
-.exit:hover .exit__tip, .exit:focus-visible .exit__tip { opacity: 1; transform: none; }
+.qx > i { display: grid; place-items: center; flex: none; width: 34px; height: 34px; border-radius: 50%; background: rgba(255, 255, 255, .18); }
+.qx > i svg { width: 12px; height: 12px; }
+.qx__t { display: grid; gap: 4px; }
+.qx__t b { font: 700 15px/1.1 var(--f-t); }
+.qx__t small { font: 500 12px/1.2 var(--f-t); color: rgba(255, 255, 255, .88); }
+.qx kbd { font: 700 11px/1 var(--f-t); padding: 2px 5px; margin: 0 1px; border-radius: 4px; background: rgba(255, 255, 255, .2); }
+.qx:hover { background: #8f150f; transform: translateY(-2px); box-shadow: 0 14px 32px rgba(160, 25, 18, .34), 0 0 0 1px rgba(255, 255, 255, .5); }
+.qx:active { transform: scale(.97); }
+.qx:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+@media (pointer: coarse) { .qx__t small { display: none; } } /* no Esc key on a phone or tablet */
+html.chat-full .qx { display: none; } /* the full-window chat has its own Quick exit in its header */
+@media print { .qx { display: none; } }
 
 /* Donate: an outlined pill beside the language switch, quieter than Quick exit */
 .donate-link { grid-area: donate; display: inline-flex; align-items: center; padding: 9px 16px; border: 1.5px solid var(--orange); border-radius: 999px; font: 700 14px/1 var(--f-t); color: var(--orange-d); text-decoration: none; white-space: nowrap; transition: background .2s, color .2s, transform .15s; }
@@ -720,13 +726,13 @@ a:hover .arrow { background: var(--c); color: var(--ink); transform: translateX(
 }
 @media (max-width: 1179px) {
   :root { --head-h: 123px; }
-  .site { top: -65px; }  /* the logo row slides away under the top edge; links and Quick exit stay */
+  .site { top: -65px; }  /* the logo row slides away under the top edge; the links stay */
   .site::before { content: ""; position: absolute; left: 0; right: 0; top: 64px; border-top: 1px solid var(--line); }
-  .site__bar { height: auto; grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "logo donate lang" "nav nav exit"; grid-template-rows: 64px 58px; gap: 0 10px; }
+  .site__bar { height: auto; grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "logo donate lang" "nav nav nav"; grid-template-rows: 64px 58px; gap: 0 10px; }
   .site__tools { display: contents; }
   .nav__links { margin-left: -10px; }
   .lang { grid-area: lang; }
-  .lang, .exit, .donate-link { justify-self: end; }
+  .lang, .donate-link { justify-self: end; }
   .logo small { display: block; }
   .nav__links { justify-self: stretch; overflow-x: auto; scrollbar-width: none; mask-image: linear-gradient(90deg, #000 88%, transparent); -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent); }
   .nav__links::-webkit-scrollbar { display: none; }
@@ -802,8 +808,9 @@ a:hover .arrow { background: var(--c); color: var(--ink); transform: translateX(
   .donate-link { padding: 8px 13px; font-size: 13px; }
   .nav__links a { padding: 14px 10px; font-size: 14.5px; }
   .nav__links a::after { left: 10px; right: 10px; }
-  .exit { padding: 6px 13px 6px 6px; gap: 7px; font-size: 13.5px; }
-  .exit > i { width: 22px; height: 22px; }
+  .qx { right: max(14px, env(safe-area-inset-right)); bottom: calc(14px + env(safe-area-inset-bottom)); gap: 8px; padding: 6px 15px 6px 6px; }
+  .qx > i { width: 32px; height: 32px; }
+  .qx__t b { font-size: 14.5px; }
   .split-hero__text { padding: 34px 0 22px; }
   .split-hero h1 { font-size: clamp(38px, 10.5vw, 48px); }
   .intro__stage { height: 270px; border-radius: 18px; }
@@ -1768,7 +1775,7 @@ html:not(.js) .need2__p + .need2__p { margin-top: 14px; }
 
 /* ---------- Avoice chat: a round launcher bottom right and a panel in the brand colours ---------- */
 .chat[hidden], .chat [hidden] { display: none !important; }
-.chat__launch { position: fixed; right: max(20px, env(safe-area-inset-right)); bottom: calc(20px + env(safe-area-inset-bottom)); z-index: 60; display: inline-flex; align-items: center; gap: 12px; padding: 6px 20px 6px 6px; border: 0; border-radius: 999px; background: var(--surface); color: var(--ink); font: inherit; text-align: left; cursor: pointer; box-shadow: 0 10px 30px rgba(70, 35, 10, .16), 0 0 0 1px rgba(38, 24, 14, .06); transition: padding .35s var(--ease), gap .35s var(--ease), box-shadow .25s, transform .15s; }
+.chat__launch { position: fixed; right: max(20px, env(safe-area-inset-right)); bottom: calc(80px + env(safe-area-inset-bottom)); z-index: 60; display: inline-flex; align-items: center; gap: 12px; padding: 6px 20px 6px 6px; border: 0; border-radius: 999px; background: var(--surface); color: var(--ink); font: inherit; text-align: left; cursor: pointer; box-shadow: 0 10px 30px rgba(70, 35, 10, .16), 0 0 0 1px rgba(38, 24, 14, .06); transition: padding .35s var(--ease), gap .35s var(--ease), box-shadow .25s, transform .15s; }
 .js .chat__launch { animation: chat-in .7s var(--ease) 1.2s backwards; }
 .chat__av { position: relative; display: grid; place-items: center; flex: none; width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(140deg, var(--orange) 0%, var(--red) 100%); color: #fff; }
 .chat__av svg { width: 24px; height: 24px; }
@@ -1784,7 +1791,7 @@ html:not(.js) .need2__p + .need2__p { margin-top: 14px; }
 .chat__launch.is-mini:not(:hover):not(:focus-visible) .chat__lt, .chat__launch[aria-expanded="true"] .chat__lt { max-width: 0; opacity: 0; }
 .chat__launch[aria-expanded="true"] .chat__ic { display: none; }
 .chat__launch[aria-expanded="true"] .chat__av svg + svg { display: block; }
-.chat__panel { position: fixed; right: max(20px, env(safe-area-inset-right)); bottom: calc(88px + env(safe-area-inset-bottom)); z-index: 60; display: flex; flex-direction: column; width: min(420px, calc(100vw - 40px)); height: min(660px, calc(100dvh - var(--chat-top, 96px) - 96px)); overflow: hidden; border-radius: 24px; background: #faf7f2; box-shadow: 0 24px 60px rgba(70, 35, 10, .22), 0 0 0 1px rgba(38, 24, 14, .06); transform-origin: 100% 100%; animation: chat-pop .35s var(--ease); }
+.chat__panel { position: fixed; right: max(20px, env(safe-area-inset-right)); bottom: calc(148px + env(safe-area-inset-bottom)); z-index: 60; display: flex; flex-direction: column; width: min(420px, calc(100vw - 40px)); height: min(660px, calc(100dvh - var(--chat-top, 96px) - 156px)); overflow: hidden; border-radius: 24px; background: #faf7f2; box-shadow: 0 24px 60px rgba(70, 35, 10, .22), 0 0 0 1px rgba(38, 24, 14, .06); transform-origin: 100% 100%; animation: chat-pop .35s var(--ease); }
 .chat__head { display: flex; align-items: center; gap: 10px; padding: 14px 12px 14px 16px; background: linear-gradient(120deg, var(--cream) 0%, #fff1e6 60%, #ffe8e1 100%); }
 .chat__av--sm { width: 40px; height: 40px; }
 .chat__av--sm svg { width: 20px; height: 20px; }
@@ -1874,10 +1881,10 @@ html.chat-full { overflow: hidden; }
   .way3__go svg { width: 18px; height: 18px; }
   .shelf__row { height: 150px; gap: 1px; padding: 12px 8px 0; }
   .chart2__plot { height: 190px; }
-  .chat__launch { right: 14px; bottom: calc(14px + env(safe-area-inset-bottom)); }
+  .chat__launch { right: 14px; bottom: calc(68px + env(safe-area-inset-bottom)); }
   .chat__panel { left: 8px; right: 8px; top: var(--chat-top, 76px); bottom: calc(8px + env(safe-area-inset-bottom) + var(--chat-kb, 0px)); width: auto; height: auto; border-radius: 20px; transform-origin: 50% 100%; }
   html.chat-open { overflow: hidden; }
-  html.chat-open .chat__launch { display: none; }
+  html.chat-open .chat__launch, html.chat-open .qx { display: none; } /* the panel fills the screen and has its own Quick exit */
   .chat__head { gap: 10px; padding-left: 12px; }
   .chat__head [data-chat-expand] { display: none; } /* on a phone the panel already fills the screen */
   .chat__compose textarea { font-size: 16px; }

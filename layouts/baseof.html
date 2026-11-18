@@ -3,6 +3,7 @@
 {{ partial "head.html" . }}
 <body>
 <a class="skip" href="#main">{{ T "skip" }}</a>
+{{ partial "quick-exit.html" . }}
 {{ partial "header.html" . }}
 {{- /* the legal pages, articles, reports and the 404 page share the "lg" layout */ -}}
 {{- $main := .Params.mainClass -}}

@@ -144,7 +144,7 @@ If you are in immediate danger, call 000.
 
 You can also call 1800RESPECT, the national domestic, family and sexual violence counselling service, on 1800 737 732 at any time.
 
-The **Quick exit** button at the top of every page takes you straight to Google, and so does pressing Esc twice. Leaving a page this way does not erase it from your browser history, so if someone else uses your device, consider using a private window or clearing your history.
+The **Quick exit** button in the bottom-right corner of every page takes you straight to Google, and so does pressing Esc twice. Leaving a page this way does not erase it from your browser history, so if someone else uses your device, consider using a private window or clearing your history.
 
 ## Changes to this notice
 
