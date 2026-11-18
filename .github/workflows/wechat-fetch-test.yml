@@ -1,0 +1,30 @@
+# Temporary, one-off: can GitHub's servers read a public WeChat article and its images?
+# Uses an honest client name. Delete this file after the test.
+name: WeChat fetch test
+
+on: workflow_dispatch
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch two articles and two images
+        env:
+          UA: "AWDPI-website-sync-test/0.1 (+https://awdpi.org/)"
+        run: |
+          check_page() {
+            code=$(curl -sS -L -A "$UA" -o page.html -w '%{http_code}' "$1" || echo failed)
+            echo "page -> HTTP $code, $(wc -c < page.html) bytes, article body: $(grep -c 'id="js_content"' page.html || true), block page: $(grep -c '环境异常' page.html || true)"
+          }
+          check_page "https://mp.weixin.qq.com/s/O285OYtko4nEBtLRDb6CNA"
+          sleep 5
+          check_page "https://mp.weixin.qq.com/s?__biz=Mzg3MjY5ODAyNA==&mid=2247489716&idx=1&sn=51ab8b2afbbf5598558a81178d63584a"
+          for u in \
+            "https://mmbiz.qpic.cn/mmbiz_png/3E9JOTXehm0KPZKC6YZ4wwIlqJQ8TCs9wSBlsX7nmonH1HhcCrgk0K9m9Nr3lmPPcPP4PdEfhOk7M7ycNGo4PA/640?wx_fmt=png" \
+            "https://mmbiz.qpic.cn/mmbiz_png/3E9JOTXehm0KPZKC6YZ4wwIlqJQ8TCs9TCuAEEKYeRQCNX61h9gYHGavxKSAgZFSHMwoIxepCIskAGxGJHbtibQ/640?wx_fmt=png"; do
+            sleep 2
+            curl -sS -A "$UA" -o img -w 'image -> HTTP %{http_code}, %{content_type}, %{size_download} bytes\n' "$u" || echo "image -> failed"
+          done
