@@ -1,6 +1,6 @@
 {{- /* Quick exit, fixed in the bottom-right corner of every page, so it stays in reach while the visitor scrolls.
    It used to sit in the header; a volunteer pointed out (2026-11-18) that help sites in other countries keep it bottom
    right, near where the cursor or thumb already is. On devices with a keyboard it also says "or press Esc twice".
-   static/js/app.js ("Quick exit") handles the click and the double Esc. The Avoice chat launcher sits just above it,
-   and the chat panel has its own Quick exit, so this one hides while the chat fills the screen. */ -}}
+   static/js/app.js ("Quick exit") handles the click and the double Esc. The Avoice chat launcher has the bottom-left
+   corner (moved there 2026-11-18 so the two buttons do not crowd one corner), and the chat panel has its own Quick exit, so this one hides while the chat fills the screen. */ -}}
 <a class="qx" href="https://www.google.com/" data-quick-exit><i><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></i><span class="qx__t"><b>{{ T "quickExit" }}</b><small>{{ T "quickExitTip" | safeHTML }}</small></span></a>

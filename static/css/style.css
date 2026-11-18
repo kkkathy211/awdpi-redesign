@@ -102,7 +102,7 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .nav__links a.nav__help { color: var(--red-d); font-weight: 600; }
 .nav__links a.nav__help::after { background: var(--red); }
 /* Quick exit: fixed bottom right on every page (layouts/_partials/quick-exit.html), the one red button, always in reach
-   while scrolling. Where there is a keyboard it says "or press Esc twice" under its name. The chat launcher sits above it. */
+   while scrolling. Where there is a keyboard it says "or press Esc twice" under its name. The chat launcher has the other corner. */
 .qx {
   position: fixed; right: max(20px, env(safe-area-inset-right)); bottom: calc(20px + env(safe-area-inset-bottom)); z-index: 70;
   display: inline-flex; align-items: center; gap: 10px; padding: 7px 18px 7px 7px; border-radius: 999px;
@@ -1773,9 +1773,9 @@ html:not(.js) .need2__p + .need2__p { margin-top: 14px; }
 .reach__form.is-flash { animation: form-flash 1.6s var(--ease); }
 @keyframes form-flash { from { background: var(--orange-t); } }
 
-/* ---------- Avoice chat: a round launcher bottom right and a panel in the brand colours ---------- */
+/* ---------- Avoice chat: a round launcher bottom left (Quick exit has the bottom-right corner) and a panel in the brand colours ---------- */
 .chat[hidden], .chat [hidden] { display: none !important; }
-.chat__launch { position: fixed; right: max(20px, env(safe-area-inset-right)); bottom: calc(80px + env(safe-area-inset-bottom)); z-index: 60; display: inline-flex; align-items: center; gap: 12px; padding: 6px 20px 6px 6px; border: 0; border-radius: 999px; background: var(--surface); color: var(--ink); font: inherit; text-align: left; cursor: pointer; box-shadow: 0 10px 30px rgba(70, 35, 10, .16), 0 0 0 1px rgba(38, 24, 14, .06); transition: padding .35s var(--ease), gap .35s var(--ease), box-shadow .25s, transform .15s; }
+.chat__launch { position: fixed; left: max(20px, env(safe-area-inset-left)); bottom: calc(20px + env(safe-area-inset-bottom)); z-index: 60; display: inline-flex; align-items: center; gap: 12px; padding: 6px 20px 6px 6px; border: 0; border-radius: 999px; background: var(--surface); color: var(--ink); font: inherit; text-align: left; cursor: pointer; box-shadow: 0 10px 30px rgba(70, 35, 10, .16), 0 0 0 1px rgba(38, 24, 14, .06); transition: padding .35s var(--ease), gap .35s var(--ease), box-shadow .25s, transform .15s; }
 .js .chat__launch { animation: chat-in .7s var(--ease) 1.2s backwards; }
 .chat__av { position: relative; display: grid; place-items: center; flex: none; width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(140deg, var(--orange) 0%, var(--red) 100%); color: #fff; }
 .chat__av svg { width: 24px; height: 24px; }
@@ -1791,7 +1791,13 @@ html:not(.js) .need2__p + .need2__p { margin-top: 14px; }
 .chat__launch.is-mini:not(:hover):not(:focus-visible) .chat__lt, .chat__launch[aria-expanded="true"] .chat__lt { max-width: 0; opacity: 0; }
 .chat__launch[aria-expanded="true"] .chat__ic { display: none; }
 .chat__launch[aria-expanded="true"] .chat__av svg + svg { display: block; }
-.chat__panel { position: fixed; right: max(20px, env(safe-area-inset-right)); bottom: calc(148px + env(safe-area-inset-bottom)); z-index: 60; display: flex; flex-direction: column; width: min(420px, calc(100vw - 40px)); height: min(660px, calc(100dvh - var(--chat-top, 96px) - 156px)); overflow: hidden; border-radius: 24px; background: #faf7f2; box-shadow: 0 24px 60px rgba(70, 35, 10, .22), 0 0 0 1px rgba(38, 24, 14, .06); transform-origin: 100% 100%; animation: chat-pop .35s var(--ease); }
+/* On the home page the round launcher sits over the left end of the "What we stand for" bar at the foot of the first
+   screen, so the bar's label starts clear of it (static/js/app.js keeps the launcher round while that bar is in view). */
+@media (min-width: 681px) { .ticker__label { padding-left: max(100px, var(--gut), calc((100% - var(--wrap)) / 2)); } }
+/* On phones the launcher's name would nearly meet Quick exit in the other corner, so it stays round there
+   (its name still shows to screen readers). */
+@media (max-width: 480px) { .chat__launch { gap: 0; padding-right: 6px; } .chat__lt { max-width: 0; opacity: 0; } }
+.chat__panel { position: fixed; left: max(20px, env(safe-area-inset-left)); bottom: calc(88px + env(safe-area-inset-bottom)); z-index: 60; display: flex; flex-direction: column; width: min(420px, calc(100vw - 40px)); height: min(660px, calc(100dvh - var(--chat-top, 96px) - 96px)); overflow: hidden; border-radius: 24px; background: #faf7f2; box-shadow: 0 24px 60px rgba(70, 35, 10, .22), 0 0 0 1px rgba(38, 24, 14, .06); transform-origin: 0 100%; animation: chat-pop .35s var(--ease); }
 .chat__head { display: flex; align-items: center; gap: 10px; padding: 14px 12px 14px 16px; background: linear-gradient(120deg, var(--cream) 0%, #fff1e6 60%, #ffe8e1 100%); }
 .chat__av--sm { width: 40px; height: 40px; }
 .chat__av--sm svg { width: 20px; height: 20px; }
@@ -1881,7 +1887,7 @@ html.chat-full { overflow: hidden; }
   .way3__go svg { width: 18px; height: 18px; }
   .shelf__row { height: 150px; gap: 1px; padding: 12px 8px 0; }
   .chart2__plot { height: 190px; }
-  .chat__launch { right: 14px; bottom: calc(68px + env(safe-area-inset-bottom)); }
+  .chat__launch { left: 14px; bottom: calc(14px + env(safe-area-inset-bottom)); }
   .chat__panel { left: 8px; right: 8px; top: var(--chat-top, 76px); bottom: calc(8px + env(safe-area-inset-bottom) + var(--chat-kb, 0px)); width: auto; height: auto; border-radius: 20px; transform-origin: 50% 100%; }
   html.chat-open { overflow: hidden; }
   html.chat-open .chat__launch, html.chat-open .qx { display: none; } /* the panel fills the screen and has its own Quick exit */
