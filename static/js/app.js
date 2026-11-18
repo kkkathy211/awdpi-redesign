@@ -946,7 +946,10 @@ const headStuck = () => { const h = document.querySelector('.site'); return h ? 
     visualViewport.addEventListener('resize', () => { if (isOpen()) { place(); scrollDown(); } });
     visualViewport.addEventListener('scroll', () => { if (isOpen()) place(); });
   }
-  const mini = () => launch.classList.toggle('is-mini', scrollY > 480);
+  // The launcher shows its name until the visitor scrolls on. On the home page it stays round from the start, because
+  // it sits bottom left, over the "What we stand for" bar at the foot of the first screen (.ticker).
+  const tick = document.querySelector('.ticker');
+  const mini = () => launch.classList.toggle('is-mini', scrollY > 480 || (!!tick && tick.getBoundingClientRect().top < innerHeight));
   addEventListener('scroll', mini, { passive: true }); mini();
   sync();
   box.hidden = false;
