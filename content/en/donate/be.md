@@ -8,7 +8,7 @@ country: be
 ---
 ## Who receives your gift
 
-Donations on this page will go to **{{< org be legalName >}}** ({{< org be legalFormShort >}}, enterprise number {{< org be registrationNumber >}}), known as AWDPI Belgium.
+Donations on this page will go to **{{< org be legalName >}}** (an international non-profit association, {{< org be legalFormShort >}}, registration number {{< org be registrationNumber >}}), known as AWDPI Belgium.
 
 ## More information
 

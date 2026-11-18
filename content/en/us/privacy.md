@@ -130,7 +130,7 @@ If you are in immediate danger, call 911.
 
 You can also call the National Domestic Violence Hotline at 1-800-799-7233, or text START to 88788, at any time.
 
-The **Quick exit** button at the top of every page takes you straight to Google, and so does pressing Esc twice. Leaving a page this way does not erase it from your browser history, so if someone else uses your device, consider using a private window or clearing your history.
+The **Quick exit** button in the bottom-right corner of every page takes you straight to Google, and so does pressing Esc twice. Leaving a page this way does not erase it from your browser history, so if someone else uses your device, consider using a private window or clearing your history.
 
 ## Changes to this notice
 

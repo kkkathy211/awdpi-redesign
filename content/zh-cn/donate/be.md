@@ -7,7 +7,7 @@ country: be
 ---
 ## 谁接收你的捐赠
 
-本页的捐赠将由 **{{< org be legalName >}}** 接收（{{< org be legalFormShort >}}，企业编号 {{< org be registrationNumber >}}），又称 AWDPI Belgium。
+本页的捐赠将由 **{{< org be legalName >}}** 接收（国际非营利社团 {{< org be legalFormShort >}}，登记号 {{< org be registrationNumber >}}），又称 AWDPI Belgium。
 
 ## 更多信息
 

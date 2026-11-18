@@ -21,7 +21,7 @@
   <div><dt>Register entry</dt><dd>{{ partial $v $e.registerURL }}</dd></div>
 {{- else if eq $e.id "be" -}}
   <div><dt>Legal form</dt><dd>{{ partial $v $e.legalForm }}{{ with $e.legalFormEnglish }}, an {{ . }}{{ end }}</dd></div>
-  <div><dt>Enterprise number</dt><dd>{{ partial $v $e.registrationNumber }} (KBO/BCE)</dd></div>
+  <div><dt>Registration number</dt><dd>{{ partial $v $e.registrationNumber }} (KBO/BCE)</dd></div>
   {{- with $e.rpm }}<div><dt>Register of legal entities</dt><dd>{{ partial $v . }}</dd></div>{{ end }}
   <div><dt>Registered office</dt><dd>{{ partial $v $e.registeredAddress }}</dd></div>
   <div><dt>Statutes</dt><dd>Published in the Annexes to the Belgian Official Gazette, {{ if and $e.statutesURL (ne (string $e.statutes) "TBD") }}<a href="{{ $e.statutesURL }}" target="_blank" rel="noopener"><span class="nowrap">{{ $e.statutes }}</span></a>{{ else }}{{ partial $v $e.statutes }}{{ end }}</dd></div>

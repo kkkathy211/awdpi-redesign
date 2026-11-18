@@ -5,7 +5,6 @@
     <div class="site__tools">
       <a class="donate-link" href="{{ "donate/" | relLangURL }}"{{ if eq .Params.nav "donate" }} aria-current="page"{{ end }}>{{ T "donate" }}</a>
       <nav class="lang" aria-label="{{ T "langLabel" }}">{{ partial "lang-links.html" . }}</nav>
-      <a class="exit" href="https://www.google.com/" data-quick-exit><i><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></i>{{ T "quickExit" }}<span class="exit__tip">{{ T "quickExitTip" | safeHTML }}</span></a>
     </div>
   </div>
 </header>
