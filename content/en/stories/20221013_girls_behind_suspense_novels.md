@@ -3,7 +3,7 @@ title: "Women’s journey into the abyss is uncovered in this suspense novel."
 date: 2022-10-13
 image: /media/stories/20221013_girls_behind_suspense_novels/cover.png
 ---
-<img src="/media/stories/20221013_girls_behind_suspense_novels/cover2.gif" class="mx-auto d-block" width="60%" />
+<img src="/media/stories/shared/05d09d09f3dc2df9.gif" class="mx-auto d-block" width="60%" />
 
 <br/><br/>
 

@@ -3,7 +3,7 @@ title: "Avoice她视角丨性别数据缺口补全之前，请继续当一个“
 date: 2022-12-26
 image: /media/stories/20221226_Invisible_women/cover.png
 ---
-<img src="/media/stories/20221003_odd_girl_out/cover2.gif" class="mx-auto d-block" width="60%" />
+<img src="/media/stories/shared/05d09d09f3dc2df9.gif" class="mx-auto d-block" width="60%" />
 
 <br/>
 

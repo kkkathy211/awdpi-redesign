@@ -24,7 +24,7 @@ static/
   css/style.css        全站样式
   js/app.js            全站脚本
   fonts/  img/         字体和设计用图
-  media/stories/       文章里的图片
+  media/stories/       文章里的图片（多篇文章共用的图片在 shared/，每张只存一份）
   reports/             研究报告和影响力报告 PDF
   handbooks/           普法手册 PDF
 ```
@@ -82,6 +82,8 @@ image: /media/stories/<名称>/cover.webp
 ```
 
 文章会同时出现在中英两种语言下。如果某篇文章两种语言内容不同，就分别放进 `content/en/stories/` 和 `content/zh-cn/stories/`。
+
+同一张图片只存一份。公众号排版里每篇都有的装饰图、二维码等，放在 `static/media/stories/shared/`，文件名是图片内容 SHA-256 的前 16 位，例如 `shared/1a2b3c4d5e6f7a8b.webp`；文章直接引用这一份，不要再复制进文章自己的文件夹。加文章前先算一下图片的 SHA-256：`shared/` 里已有的，直接引用；其他文章的文件夹里已有的，把那份移进 `shared/`（按上面的规则改名），并改掉那篇文章里的引用。GitHub Pages 发布的网站上限是 1 GB，重复的图片会很快把它占满。
 
 **加一份研究报告**：PDF 放进 `static/reports/`，封面放进 `static/img/report-<id>.jpg`，再在 `content/en/research/` 和 `content/zh-cn/research/` 各加一个 `<id>.md`（照现有文件的格式），并在两种语言的研究页（`research/_index.html`）列表里加一行。
 

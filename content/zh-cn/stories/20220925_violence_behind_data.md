@@ -3,7 +3,7 @@ title: "她视角｜数说暴力：数字背后，是全球无数女性赤裸裸
 date: 2022-09-25
 image: /media/stories/20220925_violence_behind_data/cover.png
 ---
-<img src="/media/stories/20221003_odd_girl_out/cover2.gif" class="mx-auto d-block" width="60%" />
+<img src="/media/stories/shared/05d09d09f3dc2df9.gif" class="mx-auto d-block" width="60%" />
 
 <br/>
 <hr style="border: 1px solid #ee7919;"/>

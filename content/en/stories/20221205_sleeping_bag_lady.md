@@ -3,7 +3,7 @@ title: "The \"Sleeping Bag Lady\" - Don't Wallow in Sadness. Look Forward."
 date: 2022-12-05
 image: /media/stories/20221205_sleeping_bag_lady/cover.png
 ---
-<img src="/media/stories/20221003_odd_girl_out/cover2.gif" class="mx-auto d-block" width="60%" />
+<img src="/media/stories/shared/05d09d09f3dc2df9.gif" class="mx-auto d-block" width="60%" />
 
 <br/>
 <hr style="border: 1px solid #ee7919;"/>

@@ -3,7 +3,7 @@ title: "Avoice愈见•她说丨拥有随心的勇气和独立的自我，每个
 date: 2022-11-03
 image: /media/stories/20221103_everyone_is_an_oasis/cover.png
 ---
-<img src="/media/stories/20221003_odd_girl_out/cover2.gif" class="mx-auto d-block" width="60%" />
+<img src="/media/stories/shared/05d09d09f3dc2df9.gif" class="mx-auto d-block" width="60%" />
 
 <br/><br/>
 
