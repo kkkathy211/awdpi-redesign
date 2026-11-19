@@ -1,0 +1,176 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  WeChat article sync for the AWDPI website, in eu-north-1. The bookmarklet posts an article to this API, an editor
+  confirms it with the team password, and the website repository's wechat-import workflow imports it.
+  Deployed by an admin from tools/wechat-sync/aws (see the README there).
+
+Parameters:
+  Repository:
+    Type: String
+    Description: The website repository, owner/name.
+    Default: kkkathy211/awdpi-redesign
+  GitHubSubject:
+    Type: String
+    Description: >
+      OIDC subject GitHub sends for workflows on main of the website repository.
+      Check the prefix with: gh api repos/<owner>/<repo>/actions/oidc/customization/sub (it changes if the repository moves).
+    Default: repo:kkkathy211@140130911/awdpi-redesign@1456684821:ref:refs/heads/main
+  Workflow:
+    Type: String
+    Default: wechat-import.yml
+  AllowedBiz:
+    Type: String
+    Description: Comma-separated __biz ids of the WeChat accounts whose articles may be synced (AWDPI's own account).
+    Default: Mzg3MjY5ODAyNA==
+  SiteUrl:
+    Type: String
+    Description: Address of the website, ending in a slash; used for the links shown to editors.
+    Default: https://kkkathy211.github.io/awdpi-redesign/
+
+Resources:
+  Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub awdpi-wechat-sync-${AWS::AccountId}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: { SSEAlgorithm: AES256 }
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      OwnershipControls:
+        Rules: [{ ObjectOwnership: BucketOwnerEnforced }]
+      LifecycleConfiguration:
+        Rules:
+          - Id: drafts
+            Status: Enabled
+            Prefix: drafts/
+            ExpirationInDays: 2
+          - Id: submissions
+            Status: Enabled
+            Prefix: inbox/
+            ExpirationInDays: 90
+          - Id: progress
+            Status: Enabled
+            Prefix: status/
+            ExpirationInDays: 90
+
+  BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref Bucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: TlsOnly
+            Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource: [!GetAtt Bucket.Arn, !Sub '${Bucket.Arn}/*']
+            Condition: { Bool: { 'aws:SecureTransport': 'false' } }
+
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/lambda/awdpi-wechat-sync
+      RetentionInDays: 30
+
+  Api:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      DefaultRouteSettings:
+        ThrottlingRateLimit: 5
+        ThrottlingBurstLimit: 10
+
+  Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: awdpi-wechat-sync
+      Description: Internal form that queues WeChat articles for the website. Does not log article text.
+      CodeUri: src/
+      Handler: index.handler
+      Runtime: nodejs22.x
+      Architectures: [arm64]
+      MemorySize: 512
+      Timeout: 20
+      LoggingConfig:
+        LogGroup: !Ref LogGroup
+        LogFormat: JSON
+        ApplicationLogLevel: INFO
+        SystemLogLevel: WARN
+      Environment:
+        Variables:
+          BUCKET: !Ref Bucket
+          REPO: !Ref Repository
+          WORKFLOW: !Ref Workflow
+          ALLOWED_BIZ: !Ref AllowedBiz
+          SITE_URL: !Ref SiteUrl
+          PASSWORD_PARAM: /awdpi/wechat-sync/password
+          TOKEN_PARAM: /awdpi/wechat-sync/github-token
+      Policies:
+        - Statement:
+            - Sid: DraftsSubmissionsProgress
+              Effect: Allow
+              Action: [s3:GetObject, s3:PutObject]
+              Resource:
+                - !Sub '${Bucket.Arn}/drafts/*'
+                - !Sub '${Bucket.Arn}/inbox/*'
+                - !Sub '${Bucket.Arn}/status/*'
+            - Sid: ListForNotFound
+              Effect: Allow
+              Action: s3:ListBucket
+              Resource: !GetAtt Bucket.Arn
+            - Sid: Secrets
+              Effect: Allow
+              Action: ssm:GetParameter
+              Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/awdpi/wechat-sync/*
+      Events:
+        Root:
+          Type: HttpApi
+          Properties: { ApiId: !Ref Api, Path: /, Method: GET }
+        Everything:
+          Type: HttpApi
+          Properties: { ApiId: !Ref Api, Path: '/{proxy+}', Method: ANY }
+
+  # The website repository's wechat-import workflow signs in with GitHub's OIDC token (no AWS keys in GitHub).
+  # It can read submissions and read and write progress, nothing else.
+  GitHubRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: awdpi-wechat-sync-github
+      Description: Assumed by the wechat-import workflow on main of the website repository.
+      MaxSessionDuration: 3600
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !Sub arn:aws:iam::${AWS::AccountId}:oidc-provider/token.actions.githubusercontent.com
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                'token.actions.githubusercontent.com:aud': sts.amazonaws.com
+                'token.actions.githubusercontent.com:sub': !Ref GitHubSubject
+      Policies:
+        - PolicyName: submissions-and-progress
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub '${Bucket.Arn}/inbox/*'
+              - Effect: Allow
+                Action: [s3:GetObject, s3:PutObject]
+                Resource: !Sub '${Bucket.Arn}/status/*'
+
+Outputs:
+  Endpoint:
+    Description: Install page for the bookmark (give this address to the editors).
+    Value: !Sub https://${Api}.execute-api.${AWS::Region}.amazonaws.com/
+  Bucket:
+    Value: !Ref Bucket
+  GitHubRoleArn:
+    Value: !GetAtt GitHubRole.Arn

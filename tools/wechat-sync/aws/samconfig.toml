@@ -1,0 +1,12 @@
+version = 0.1
+
+# Deployed by an admin: cd tools/wechat-sync/aws && SAM_CLI_TELEMETRY=0 AWS_PROFILE=awdpi sam deploy
+# Pass every non-default template parameter in parameter_overrides, otherwise the next deploy loses it.
+[default.deploy.parameters]
+stack_name = "awdpi-wechat-sync"
+region = "eu-north-1"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-tzr6yjgiowok"
+s3_prefix = "awdpi-wechat-sync"
+capabilities = "CAPABILITY_IAM CAPABILITY_NAMED_IAM"
+confirm_changeset = false
+fail_on_empty_changeset = false

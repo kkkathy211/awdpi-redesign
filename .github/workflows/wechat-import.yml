@@ -1,0 +1,106 @@
+# Imports one WeChat article submitted through the internal form (tools/wechat-sync), commits it to main and
+# publishes the site. The form starts this workflow with the submission id; an admin can also start it by hand
+# from the Actions tab (dry run: import and check the build without committing).
+name: Import WeChat article
+
+on:
+  workflow_dispatch:
+    inputs:
+      id:
+        description: Submission id (shown at the bottom of the editor's progress page)
+        required: true
+      dry_run:
+        description: Import and check the build only; do not commit or publish
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  actions: write
+  id-token: write
+
+concurrency:
+  group: wechat-import
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: eu-north-1
+  AWS_ROLE: arn:aws:iam::302659308749:role/awdpi-wechat-sync-github
+  BUCKET: awdpi-wechat-sync-302659308749
+  # Same values as the awdpi-wechat-sync stack parameters (tools/wechat-sync/aws/template.yaml).
+  ALLOWED_BIZ: Mzg3MjY5ODAyNA==
+  SITE_URL: https://kkkathy211.github.io/awdpi-redesign/
+  HUGO_VERSION: 0.169.0
+  ID: ${{ inputs.id }}
+  DRY_RUN: ${{ inputs.dry_run }}
+  RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check the submission id
+        run: |
+          [[ "$ID" =~ ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$ ]] || { echo "Not a submission id: $ID"; exit 1; }
+      - uses: actions/checkout@v4
+      # GitHub's OIDC token; the role can only read submissions and read and write progress.
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Report progress
+        run: tools/wechat-sync/status.sh running
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: tools/wechat-sync/package-lock.json
+      - name: Install the importer
+        run: npm ci --prefix tools/wechat-sync --no-audit --no-fund
+      - name: Download the submission
+        run: aws s3 cp "s3://$BUCKET/inbox/$ID.json" "$RUNNER_TEMP/submission.json" --only-show-errors
+      - name: Import
+        run: node tools/wechat-sync/import.mjs "$RUNNER_TEMP/submission.json" . "$RUNNER_TEMP/result.json"
+      - name: Install Hugo
+        run: |
+          wget -q -O "$RUNNER_TEMP/hugo.deb" "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.deb"
+          sudo dpkg -i "$RUNNER_TEMP/hugo.deb" >/dev/null
+      - name: Check that the site builds
+        run: hugo --renderToMemory --quiet
+      - name: Commit and push
+        id: commit
+        if: env.DRY_RUN != 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A content static
+          if git diff --cached --quiet; then
+            echo "Nothing changed: the article is already on the site as it is."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git diff --cached --stat | tail -3
+          title=$(jq -r .title "$RUNNER_TEMP/result.json")
+          git commit -q -m "Story from WeChat: $title" -m "Submission $ID"
+          pushed=false
+          for attempt in 1 2 3; do
+            if git pull -q --rebase origin main && git push -q origin HEAD:main; then pushed=true; break; fi
+            sleep 5
+          done
+          $pushed
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+      # A push made with the workflow's own token does not start other workflows, so start the deploy explicitly.
+      - name: Publish the site
+        if: env.DRY_RUN != 'true' && steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref main
+      - name: Report success
+        run: |
+          tools/wechat-sync/status.sh published "$(jq -c --arg dry "$DRY_RUN" '{url, title, replaced, imagesFailed, dryRun: ($dry == "true")}' "$RUNNER_TEMP/result.json")"
+      - name: Report failure
+        if: failure()
+        run: |
+          message=$(jq -r '.message // empty' "$RUNNER_TEMP/result.json" 2>/dev/null || true)
+          tools/wechat-sync/status.sh failed "$(jq -nc --arg m "${message:-导入时出错}" '{message: $m}')"
