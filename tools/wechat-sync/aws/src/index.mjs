@@ -381,7 +381,10 @@ function show(s) {
   var d = document.getElementById("detail");
   d.textContent = t[1];
   if (s.title) set("title", s.title);
-  if (s.state === "published" && s.url) {
+  if (s.state === "published" && s.dryRun) {
+    el.textContent = "试运行成功";
+    d.textContent = "管理员的试运行：文章能正常导入，但没有发布到网站。";
+  } else if (s.state === "published" && s.url) {
     d.textContent = (s.replaced ? "网站上的旧版本已被替换。" : "") + "网站更新大约需要 2 分钟，之后可以在这里看到：";
     var a = document.createElement("a"); a.href = s.url; a.textContent = s.url; a.target = "_blank"; a.rel = "noopener";
     d.appendChild(a);
