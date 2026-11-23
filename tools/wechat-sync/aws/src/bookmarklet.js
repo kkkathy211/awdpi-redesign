@@ -22,7 +22,7 @@
     return e ? e.innerText.trim() : "";
   };
   var m = document.querySelector('meta[property="og:image"]');
-  var s = document.querySelector("#js_share_source, #js_share_notice, .share_notice");
+  var s = document.querySelector("#js_share_source");
   var q = new URLSearchParams(location.search);
   var data = {
     v: 1,
@@ -42,6 +42,20 @@
     shareSource: s ? s.innerText.trim().slice(0, 200) : "",
     html: c.innerHTML
   };
+  var pics = d.picture_page_info_list || [];
+  if (pics.length) {
+    var box = document.createElement("div");
+    for (var k = 0; k < pics.length; k++) {
+      if (!pics[k] || !pics[k].cdn_url) continue;
+      var para = document.createElement("p");
+      para.style.textAlign = "center";
+      var img = document.createElement("img");
+      img.src = pics[k].cdn_url;
+      para.appendChild(img);
+      box.appendChild(para);
+    }
+    data.html = data.html + box.innerHTML;
+  }
   var f = document.createElement("form");
   f.method = "post";
   f.action = E + "/capture";
