@@ -16,6 +16,7 @@ import fs from "node:fs";
 import path from "node:path";
 import * as cheerio from "cheerio";
 import sharp from "sharp";
+import { fixLayout } from "./layout.mjs";
 
 const [submissionPath, repoArg, resultPath] = process.argv.slice(2);
 if (!submissionPath || !repoArg || !resultPath) {
@@ -244,6 +245,9 @@ root.find("iframe, mpvideo, mp-video, mpvideosnap, mp-common-videosnap, mpvoice,
   media++;
 });
 
+// Phone layouts on a wider page (see layout.mjs).
+const layout = fixLayout($, root);
+
 // ---------- collect images ----------
 const uses = []; // { url, apply(newPath) }
 const STYLE_URL = /url\(\s*(['"]?)([^'")]+)\1\s*\)/g;
@@ -390,6 +394,8 @@ const result = {
   newImageBytes: bytes,
   blocksRemoved: removed,
   mediaReplacedWithLink: media,
+  imageStylesRestored: layout.restored,
+  hangingMarginsRemoved: layout.margins,
 };
 fs.writeFileSync(resultPath, JSON.stringify(result));
 log(JSON.stringify(result, null, 1));

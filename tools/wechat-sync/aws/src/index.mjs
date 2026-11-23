@@ -89,7 +89,8 @@ function derive(a) {
   const zh = /\p{Script=Han}/u.test(a.title);
   const text = a.html.replace(/<style[\s\S]*?<\/style>/gi, "").replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
   const images = (a.html.match(/<img\b/gi) || []).length;
-  const original = a.copyright === "1" || /原创/.test(a.originalLabel || "");
+  // The label follows the browser language ("原创" or "Original").
+  const original = a.copyright === "1" || /原创|original/i.test(a.originalLabel || "");
   const hints = [];
   if (a.shareSource) hints.push(`页面上写着：${a.shareSource.slice(0, 80)}`);
   const m = text.match(/.{0,12}(转载自|转自|来源[:：]|本文来源|原文链接|经授权转载|授权转载|编译自|翻译自).{0,20}/);
