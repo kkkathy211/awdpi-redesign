@@ -1,0 +1,8 @@
+{{- /* An article card. Context: dict "page" (the article), optional "tags" (filter ids) and "hidden". */ -}}
+{{- $p := .page -}}
+{{- $cat := partial "stories/category.html" $p.Params.category -}}
+<a class="card story" href="{{ $p.RelPermalink }}"{{ if findRE `\p{Han}` $p.Title 1 }} lang="zh-CN"{{ end }}{{ with .tags }} data-tags="{{ . }}"{{ end }}{{ if .hidden }} hidden{{ end }} data-reveal><div class="frame">
+{{- with $p.Params.image }}<img src="{{ . | relURL }}" alt="" width="720" height="306" loading="lazy">{{ else }}<span class="frame__blank" aria-hidden="true">AWDPI</span>{{ end -}}
+</div>
+<div class="story__body">{{ with $cat }}<span class="tag">{{ cond (eq site.Language.Lang "zh-cn") .zh .en }}</span>{{ end }}<h3>{{ $p.Title }}</h3><p>{{ partial "stories/excerpt.html" $p }}</p></div></a>
+{{- /**/ -}}

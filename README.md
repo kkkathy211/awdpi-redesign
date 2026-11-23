@@ -18,6 +18,7 @@ content/
 data/organisations.toml  四个注册主体的法律信息
 data/donate.toml         捐赠页：各国的开通状态、币种、嵌入的捐赠工具、外部公益平台和项目
 data/partners.toml       关于页的合作伙伴标志（文件在 static/img/partners/）
+data/story_categories.json  文章分类：名称、说明、给 AI 看的定义
 i18n/en.toml, zh-cn.toml  模板里的界面文字（页头、页脚、按钮）
 layouts/               模板
 static/
@@ -41,6 +42,7 @@ tools/wechat-sync/     公众号文章同步：书签、内部表单（AWS）、
 | `layouts/_partials/legal-line.html` | 页脚的法律信息一行 |
 | `layouts/legal/` | 法律信息页、隐私声明、隐私政策和使用条款页 |
 | `layouts/stories/` | 文章页和"全部文章"列表 |
+| `layouts/_shortcodes/story-*.html` | 新闻与故事页、首页上按文章自动生成的部分：最新文章和筛选、文章卡片、篇数、年份图表、分类链接 |
 | `layouts/research/` | 研究报告页 |
 
 ## 网址
@@ -77,16 +79,22 @@ tools/wechat-sync/     公众号文章同步：书签、内部表单（AWS）、
 ---
 title: "文章标题"
 date: 2026-11-20
+category: her
+description: "卡片上的一两句介绍，从正文里摘"
 image: /media/stories/<名称>/cover.webp
 ---
 正文
 ```
+
+`category` 是分类，取值见 `data/story_categories.json` 里的 `id`；`description` 显示在文章卡片上，也是网页的描述。新闻与故事页的"最新文章"、筛选按钮上的篇数、年份图表和首页的三张文章卡片，都按文章的日期和分类自动生成，不用手改。
 
 文章会同时出现在中英两种语言下。如果某篇文章两种语言内容不同，就分别放进 `content/en/stories/` 和 `content/zh-cn/stories/`。
 
 同一张图片只存一份。公众号排版里每篇都有的装饰图、二维码等，放在 `static/media/stories/shared/`，文件名是图片内容 SHA-256 的前 16 位，例如 `shared/1a2b3c4d5e6f7a8b.webp`；文章直接引用这一份，不要再复制进文章自己的文件夹。加文章前先算一下图片的 SHA-256：`shared/` 里已有的，直接引用；其他文章的文件夹里已有的，把那份移进 `shared/`（按上面的规则改名），并改掉那篇文章里的引用。GitHub Pages 发布的网站上限是 1 GB，重复的图片会很快把它占满。
 
 **同步公众号文章**：宣传组发完文章后，在电脑浏览器里打开文章，点书签"同步到官网"，核对后输入团队密码提交，大约 3 分钟后文章出现在网站上。书签的安装和使用说明在内部表单的首页。导入工作流（`.github/workflows/wechat-import.yml`）按上面"加一篇文章"的规则生成文章和图片，并直接提交到 main。管理和排错见 `tools/wechat-sync/README.md`。
+
+**改文章分类**：分错的文章，改它开头的 `category` 就行。增删分类或改名称、说明，编辑 `data/story_categories.json`（文件开头有说明）。旧文章的分类是 AI 先分好、再由宣传组核对的；以后同步进来的文章，由编辑在同步时确认分类。重新让 AI 给文章分类的办法见 `tools/wechat-sync/README.md`。
 
 **加一份研究报告**：PDF 放进 `static/reports/`，封面放进 `static/img/report-<id>.jpg`，再在 `content/en/research/` 和 `content/zh-cn/research/` 各加一个 `<id>.md`（照现有文件的格式），并在两种语言的研究页（`research/_index.html`）列表里加一行。
 

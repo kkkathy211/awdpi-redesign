@@ -1,6 +1,7 @@
 ---
 title: "Sally's Story of Chasing the Light"
 date: 2022-01-13
+category: her
 image: /media/stories/20220103_sally/cover.png
 ---
 Confronting the "scars" of the past and encouraging women to speak out together - Sally's story of "chasing the light"

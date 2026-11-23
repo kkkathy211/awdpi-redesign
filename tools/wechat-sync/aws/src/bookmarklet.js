@@ -34,6 +34,7 @@
     title: p(t("activity-name"), w.msg_title, d.title),
     ct: p(w.ct, d.create_time, d.ori_create_time),
     cover: p(w.msg_cdn_url, d.cdn_url, m ? m.content : ""),
+    desc: p(w.msg_desc, d.desc),
     account: p(w.nickname, d.nick_name),
     author: p(d.author, t("js_author_name")),
     copyright: p(w.copyright_stat, w._copyright_stat, d.copyright_info ? d.copyright_info.copyright_stat : ""),

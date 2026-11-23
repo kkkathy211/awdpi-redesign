@@ -364,10 +364,20 @@ for (const use of uses) {
 let body = root.html().trim();
 const image = (coverUrl && stored.get(coverUrl)) || [...stored.values()][0] || "";
 const yaml = (s) => JSON.stringify(String(s).replace(/\s+/g, " ").trim());
+// Category and card text from the form. A second import without them keeps what the article already has.
+const previous = [".html", ".md"].map((ext) => path.join(storiesDir, slug + ext)).filter((f) => fs.existsSync(f))
+  .map((f) => (fs.readFileSync(f, "utf8").match(/^---\n([\s\S]*?)\n---/) || ["", ""])[1])[0] || "";
+const keep = (key) => (previous.match(new RegExp(`^${key}:\\s*(.*)$`, "m")) || [])[1] || "";
+const categoryFile = path.join(repo, "data", "story_categories.json");
+const categoryIds = fs.existsSync(categoryFile) ? JSON.parse(fs.readFileSync(categoryFile, "utf8")).categories.map((c) => c.id) : [];
+const category = categoryIds.includes(sub.category) ? sub.category : keep("category");
+const description = sub.description ? yaml(sub.description) : keep("description");
 const front = [
   "---",
   `title: ${yaml(a.title)}`,
   `date: ${sub.date}`,
+  category ? `category: ${category}` : null,
+  description ? `description: ${description}` : null,
   image ? `image: ${image}` : null,
   wechatId ? `wechat_id: ${yaml(wechatId)}` : null,
   link ? `wechat: ${yaml(link)}` : null,
@@ -385,6 +395,7 @@ const result = {
   slug,
   title: a.title,
   replaced: existed,
+  category,
   url: `${siteUrl}${zh ? "zh-cn/" : ""}stories/${slug}/`,
   images: stored.size,
   imagesReused: reused,

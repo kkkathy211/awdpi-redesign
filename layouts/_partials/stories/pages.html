@@ -1,0 +1,3 @@
+{{- /* Articles in this language, newest first. Leaves out the "-copy" pages under content/en/stories/, which only keep
+       old addresses working. Used by the stories page, the home page and the list of all articles. */ -}}
+{{- return partial "stories/without-copies.html" (where site.RegularPages "Section" "stories").ByDate.Reverse -}}

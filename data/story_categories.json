@@ -1,0 +1,90 @@
+{
+  "_readme": [
+    "文章分类。每篇文章在开头写一行 category: <id>（例如 category: her），页面按这里的顺序显示筛选按钮。",
+    "zh / en：页面上显示的名称。zhNote / enNote：新闻与故事页上的一句说明（hero 为 true 的分类显示在页面上方）。",
+    "define：给 AI 分类看的定义，写清楚包括什么、不包括什么。改了定义或增删分类后，同步工具会自动用新的定义；已经分好的文章不会自动改。",
+    "colour：orange、yellow、pink、red 之一，只用于页面上方的分类链接。id 一旦用了就不要改，否则要同时改所有文章。"
+  ],
+  "categories": [
+    {
+      "id": "her",
+      "zh": "她视角",
+      "en": "Her perspective",
+      "zhNote": "亚裔女性的历史与生活，以及反暴力一线工作者的专访",
+      "enNote": "The history and lives of Asian women, and interviews with people working against violence",
+      "hero": true,
+      "colour": "orange",
+      "define": "人物专访、个人经历和故事、从女性视角写的评论和随笔、历史人物介绍。常见栏目：她视角、愈见·她说、Ta力量、她树洞、播客。"
+    },
+    {
+      "id": "events",
+      "zh": "活动",
+      "en": "Events",
+      "zhNote": "我们的讲座、工作坊、论坛和读书会",
+      "enNote": "Our talks, workshops, forums and reading groups",
+      "hero": true,
+      "colour": "pink",
+      "define": "AWDPI 或 Avoice 举办或联合举办的活动：预告、报名、参与者征集、回顾、金句集锦、延期通知。包括讲座、工作坊、论坛、读书会、观影会、公益课堂、心理课程、分享会。文章主要是在介绍一场活动的，都归这一类，即使是和别的机构合办。"
+    },
+    {
+      "id": "research",
+      "zh": "研究与编译",
+      "en": "Research",
+      "zhNote": "研究文章、调研和外文编译",
+      "enNote": "Research, surveys and translated articles",
+      "hero": false,
+      "colour": "red",
+      "define": "研究文章、调研报告和数据解读、外文文章或报告的编译和翻译、观察月刊。不包括每月的性别平等与亚裔发展动态新闻汇总（那是国际动态）。"
+    },
+    {
+      "id": "world",
+      "zh": "国际动态",
+      "en": "UN and world",
+      "zhNote": "联合国和国际纪念日，以及每月的性别平等新闻",
+      "enNote": "UN days and campaigns, and monthly gender equality news",
+      "hero": false,
+      "colour": "red",
+      "define": "国际新闻和国际倡导：联合国相关内容，国际纪念日（如反性别暴力16日行动、国际妇女节、消除对妇女暴力国际日），每月的“性别平等与亚裔发展动态”新闻汇总，各国与女性和亚裔有关的新闻事件评述。如果文章主要是在介绍 AWDPI 自己办的一场活动，归活动。"
+    },
+    {
+      "id": "partner",
+      "zh": "合作",
+      "en": "Partners",
+      "zhNote": "和其他机构、高校、社团的合作",
+      "enNote": "Work with other organisations, universities and groups",
+      "hero": false,
+      "colour": "yellow",
+      "define": "和其他机构、高校、社团、媒体的合作：合作项目介绍、签约、合作方来稿或合作方的推文、联合倡议。如果文章主要是一场活动的预告或回顾，归活动。"
+    },
+    {
+      "id": "resources",
+      "zh": "资源与推荐",
+      "en": "Resources",
+      "zhNote": "书影推荐、普法手册和求助指南",
+      "enNote": "Recommended books and films, legal handbooks and guides",
+      "hero": false,
+      "colour": "yellow",
+      "define": "推荐和实用资料：书籍、电影、播客、文章推荐（栏目：Avoice推荐、AWDPI推荐），普法手册、求助指南、取证指南、心理健康知识等读者可以直接拿来用的内容。"
+    },
+    {
+      "id": "opps",
+      "zh": "机会与招募",
+      "en": "Opportunities",
+      "zhNote": "性别与发展领域的机会，以及志愿者招募",
+      "enNote": "Opportunities in gender and development, and calls for volunteers",
+      "hero": true,
+      "colour": "yellow",
+      "define": "给读者的机会：全球机会栏目（奖学金、实习、工作、会议、课程、资助等机会汇总），AWDPI 和 Avoice 招募志愿者、成员、实习生。活动的参与者征集归活动。"
+    },
+    {
+      "id": "org",
+      "zh": "机构动态",
+      "en": "Our news",
+      "zhNote": "AWDPI 和 Avoice 的工作进展和消息",
+      "enNote": "News and updates from AWDPI and Avoice",
+      "hero": false,
+      "colour": "orange",
+      "define": "AWDPI 和 Avoice 自己的消息：工作报告、工作双月报、年度总结、项目进展、在新国家或地区成立和启动、获奖、媒体对我们的报道、节日问候、机构通知。"
+    }
+  ]
+}

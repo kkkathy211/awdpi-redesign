@@ -1,6 +1,8 @@
 ---
 title: "Avoice愈见•她说 | “睡袋女士”：不要沉浸在悲伤情绪里，向前看"
 date: 2022-12-05
+category: her
+description: "因为热爱露营，她自称为“睡袋女士”。因为心怀毅力和乐观，露营途中虽危险重重她仍怡然自乐。可是，生活对她来说也危机重重、意外频出，孤身在伦敦留学的她遭受了前男友的暴力，面对这不可预计的苦难，“睡袋女士”打算迎难而上，尽快实现对前男友的举报和惩罚，然后迈向新的生活。"
 image: /media/stories/20221205_sleeping_bag_lady/cover.png
 ---
 <img src="/media/stories/shared/05d09d09f3dc2df9.gif" class="mx-auto d-block" width="60%" />

@@ -1,6 +1,8 @@
 ---
 title: "Avoice愈见•她说丨拥有随心的勇气和独立的自我，每个人都是一片绿洲"
 date: 2022-11-03
+category: her
+description: "Evelyn是一名拥有园林景观设计知识的职业心理咨询师。她好像很特别，出生之前就被赋予了“拯救他人”的使命。成长途中虽然经历过现实与理想的挣扎，不过好在最终她还是像她的名字一样，成为了一片滋养心灵的“绿洲”。"
 image: /media/stories/20221103_everyone_is_an_oasis/cover.png
 ---
 <img src="/media/stories/shared/05d09d09f3dc2df9.gif" class="mx-auto d-block" width="60%" />

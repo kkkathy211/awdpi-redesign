@@ -3,12 +3,17 @@
   "private": true,
   "description": "Turns a WeChat article captured by the bookmarklet into a story on the website",
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "import": "node import.mjs"
   },
   "dependencies": {
     "cheerio": "1.2.0",
     "sharp": "0.35.5"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-bedrock-runtime": "3.1164.0"
   }
 }

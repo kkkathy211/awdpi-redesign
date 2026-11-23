@@ -1,6 +1,8 @@
 ---
 title: "Avoice · 从一本悬疑小说中，看到被社会逐渐埋没的她们"
 date: 2022-10-13
+category: her
+description: "铃木阳子，是日本社会派推理小说家叶真中显创作的悬疑小说《绝叫》中的主人公。 在她出生那天，万里无云，阳光普照，于是她有了“阳子”这个看起来有意境的名字。"
 image: /media/stories/20221013_girls_behind_suspense_novels/cover.png
 ---
 <img src="/media/stories/shared/05d09d09f3dc2df9.gif" class="mx-auto d-block" width="60%" />

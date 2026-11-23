@@ -1,6 +1,8 @@
 ---
 title: "愈见 · 她说｜我经历过至暗时刻，最终也寻到光"
 date: 2022-01-13
+category: her
+description: "故事的主人公Sally女士，她是一位生活在荷兰的华人女性，接受过良好的教育，依靠自己实现经济和精神的双重独立，却也没有逃过家庭暴力阴影的笼罩。"
 image: /media/stories/20220103_sally/cover.png
 ---
 <img src="/media/stories/20220103_sally/cover2.gif" width="80%" />

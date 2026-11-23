@@ -6,7 +6,7 @@
 编辑的浏览器（公众号文章页）
   └─ 书签“同步到官网”：读取标题、发布时间、封面和正文，提交到内部表单
 内部表单（AWS 斯德哥尔摩，堆栈 awdpi-wechat-sync）
-  └─ 编辑核对信息，选原创或转载，输入团队密码 → 存入 S3，启动 GitHub 工作流
+  └─ 编辑核对信息，确认分类（AI 预先选好），选原创或转载，输入团队密码 → 存入 S3，启动 GitHub 工作流
 GitHub 工作流 wechat-import.yml
   └─ 下载图片并转成 WebP，清理正文，生成 content/stories/<名称>.html，检查网站能生成，提交到 main，发布网站
 ```
@@ -19,6 +19,8 @@ GitHub 工作流 wechat-import.yml
 | --- | --- |
 | `aws/src/bookmarklet.js` | 书签脚本。首页把它变成书签网址，改动后重新部署堆栈，编辑要重新拖一次书签 |
 | `aws/src/index.mjs` | 内部表单：首页、核对页、提交、进度页 |
+| `aws/src/classify.mjs` | 用 AI 建议分类和卡片介绍（AWS 斯德哥尔摩的 DeepSeek V3.2） |
+| `classify-all.mjs` | 给已有的全部文章分类 |
 | `aws/template.yaml` | AWS 资源：HTTP API、Lambda、S3 桶、GitHub 工作流用的角色 |
 | `import.mjs` | 导入程序，由工作流运行 |
 | `layout.mjs` | 让手机排版在网页上不错位 |
@@ -33,6 +35,8 @@ GitHub 工作流 wechat-import.yml
 - 下载正文里的所有图片，包括背景图和 SVG 里的图片，转成 WebP：大于 50 KB 的有损压缩（质量 60），小 PNG 无损，其他小图质量 80；转换后反而更大的保留原图。
 - 每张图片只存一份，规则见仓库 README 的"加一篇文章"。
 - 文章名称和旧导入一样：发布日期（北京时间）加标题 SHA-256 的前 4 位，例如 `20261118-1a2b`。front matter 里记下 `wechat_id`，同一篇文章再提交时替换原来那篇，网址不变。
+- 分类：核对页上的下拉框预先选好 AI 建议的分类，编辑确认或改掉。AI 看的是标题和正文开头，分类和定义从 `data/story_categories.json` 读，改了这个文件最多 5 分钟后核对页就用新的。AI 调用失败时下拉框留空，由编辑自己选。
+- 卡片介绍（`description`）：编辑在公众号后台写了摘要的，用摘要；没写的（微信会把正文开头当摘要），用 AI 从正文里原样摘的一两句。AI 摘的句子要在正文里找得到才会用，不会出现 AI 自己写的话。
 - 编辑选了"转载"的，必须勾选已获授权才能提交，文章的 front matter 里会有 `reprint: true`。
 - 已有中英文单独版本（`content/<语言>/stories/`）的文章不会被覆盖，要手动更新。
 
@@ -60,6 +64,15 @@ aws ssm put-parameter --profile awdpi --region eu-north-1 --name /awdpi/wechat-s
 gh workflow run wechat-import.yml -f id=<编号>
 gh workflow run wechat-import.yml -f id=<编号> -f dry_run=true
 ```
+
+给已有文章分类（管理员，需要 `awdpi` SSO 账号；在 `tools/wechat-sync` 下先运行 `npm ci`）：
+
+```bash
+AWS_PROFILE=awdpi node classify-all.mjs ../.. 结果.json            # 只问 AI，不改文件；中断了再运行会接着做
+AWS_PROFILE=awdpi node classify-all.mjs ../.. 结果.json --write    # 把分类写进还没有分类的文章，没有介绍的补上介绍
+```
+
+`--redo` 让 AI 重新分所有文章并覆盖已有分类（人工改过的也会被覆盖，慎用）；`--excerpts` 只给没有介绍的文章再取一次介绍。约 500 篇文章花费约 0.6 美元。AI 对自己的判断总是说"很确定"，所以这个把握程度没有参考价值，核对时按"AI 分类和标题栏目名对不上"的优先看。
 
 从网站上删掉一篇同步过来的文章：删除 `content/stories/<名称>.html` 和 `static/media/stories/<名称>/`，提交到 main。`shared/` 里的图片可能还有其他文章在用，不要删。
 

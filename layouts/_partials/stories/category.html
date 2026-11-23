@@ -1,0 +1,4 @@
+{{- /* The category of an article (its front matter `category`), from data/story_categories.json; empty if none. */ -}}
+{{- $c := dict -}}
+{{- with . }}{{ with where hugo.Data.story_categories.categories "id" . }}{{ $c = index . 0 }}{{ end }}{{ end -}}
+{{- return $c -}}

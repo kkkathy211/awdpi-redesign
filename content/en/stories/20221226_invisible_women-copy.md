@@ -1,6 +1,8 @@
 ---
 title: "Avoice她视角丨性别数据缺口补全之前，请继续当一个“难缠”的人——《看不见的女性》"
 date: 2022-12-26
+category: her
+description: "作为长期为女性及弱势群体发声的研究学者，英国作家Caroline整理并罗列了大量详实的性别数据，掷地有声地将当代女性困境通过 《看不见的女性》 一书告知众人。"
 image: /media/stories/20221226_Invisible_women/cover.png
 ---
 <img src="/media/stories/shared/05d09d09f3dc2df9.gif" class="mx-auto d-block" width="60%" />

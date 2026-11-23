@@ -1,0 +1,4 @@
+{{- /* The given articles without the "-copy" pages under content/en/stories/ (they only keep old addresses working). */ -}}
+{{- $out := slice -}}
+{{- range . }}{{ if not (and .File (strings.HasSuffix .File.BaseFileName "-copy")) }}{{ $out = $out | append . }}{{ end }}{{ end -}}
+{{- return $out -}}

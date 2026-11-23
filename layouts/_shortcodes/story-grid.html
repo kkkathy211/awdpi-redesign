@@ -1,0 +1,37 @@
+{{- /* "Latest articles" on the stories page: filter buttons by category (data/story_categories.json, counts over all
+       articles) and the newest cards. "All" shows the newest `limit` (default 12) articles; a category shows its newest
+       `limit`. The link below goes to the list of all articles, filtered the same way. */ -}}
+{{- $zh := eq site.Language.Lang "zh-cn" -}}
+{{- $limit := .Get "limit" | default 12 | int -}}
+{{- $pages := partial "stories/pages.html" . -}}
+{{- $cats := hugo.Data.story_categories.categories -}}
+{{- $latest := first $limit $pages -}}
+{{- $top := dict -}}
+{{- $render := $latest -}}
+{{- range $cats }}
+  {{- $these := where $pages "Params.category" .id }}
+  {{- $top = merge $top (dict .id (first $limit $these)) }}
+  {{- $render = $render | append (first $limit $these) }}
+{{- end -}}
+{{- $render = sort (uniq $render) "Date" "desc" -}}
+{{- $all := "stories/all/" | relLangURL -}}
+<div class="filters" data-filters="story-grid" role="group" aria-label="{{ cond $zh "按类型筛选文章" "Filter articles by type" }}">
+  <button type="button" data-filter="all" aria-pressed="true" data-more="{{ $all }}" data-more-label="{{ cond $zh (printf "查看全部 %d 篇文章" (len $pages)) (printf "All %d articles" (len $pages)) }}">{{ cond $zh "全部" "All" }} <em>{{ len $pages }}</em></button>
+  {{- range $cats }}
+  {{- $n := len (where $pages "Params.category" .id) }}
+  {{- if $n }}
+  <button type="button" data-filter="{{ .id }}" aria-pressed="false" data-more="{{ $all }}#cat-{{ .id }}" data-more-label="{{ cond $zh (printf "查看全部 %d 篇%s文章" $n .zh) (printf "All %d articles in %s" $n .en) }}">{{ cond $zh .zh .en }} <em>{{ $n }}</em></button>
+  {{- end }}
+  {{- end }}
+</div>
+<p class="sr" id="story-grid-count" aria-live="polite"></p>
+<div class="grid g3" id="story-grid" data-explicit-all>
+{{- range $render }}
+  {{- $p := . }}
+  {{- $tags := slice }}
+  {{- if in $latest $p }}{{ $tags = $tags | append "all" }}{{ end }}
+  {{- with $p.Params.category }}{{ with index $top . }}{{ if in . $p }}{{ $tags = $tags | append $p.Params.category }}{{ end }}{{ end }}{{ end }}
+  {{ partial "stories/card.html" (dict "page" $p "tags" (delimit $tags " ") "hidden" (not (in $tags "all"))) }}
+{{- end }}
+</div>
+<div class="btn-row" style="margin-top:36px"><a class="btn btn--line" href="{{ $all }}" data-more-link>{{ cond $zh (printf "查看全部 %d 篇文章" (len $pages)) (printf "All %d articles" (len $pages)) }} {{ partial "icon.html" "arrow" }}</a></div>

@@ -1,6 +1,7 @@
 ---
 title: "It's not about numbers: It is the stark reality of the lives of millions of women around the world"
 date: 2022-09-25
+category: world
 image: /media/stories/20220925_violence_behind_data/cover.png
 ---
 <img src="/media/stories/shared/05d09d09f3dc2df9.gif" class="mx-auto d-block" width="60%" />

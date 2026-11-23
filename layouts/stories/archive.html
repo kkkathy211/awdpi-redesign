@@ -1,19 +1,32 @@
-{{- /* All articles, by year: /stories/all/. Lists every article in this language. */ -}}
+{{- /* All articles, by year: /stories/all/. Lists every article in this language, with its category
+       (data/story_categories.json). The buttons filter the list; /stories/all/#cat-<id> opens it filtered. */ -}}
 {{ define "main" }}
 {{- $zh := eq site.Language.Lang "zh-cn" -}}
+{{- $pages := partial "stories/pages.html" . -}}
 {{- $groups := .CurrentSection.RegularPages.GroupByDate "2006" -}}
 {{- $crumbs := partial "legal/crumb.html" (slice (dict "title" (T "storiesBack") "href" ("stories/" | relLangURL)) (dict "title" .Title)) -}}
 {{ partial "legal/hero.html" (dict "title" .Title "crumbs" $crumbs "lead" (T "storiesAllLead")) }}
 <div class="lg__body"><div class="wrap lg__in">
-<nav class="arc__years" aria-label="{{ T "storiesYear" }}">{{ range $groups }}<a class="arc__year" href="#y{{ .Key }}">{{ partial "year.html" .Key }} <em>{{ len .Pages }}</em></a>{{ end }}</nav>
+<div class="filters arc__filters" data-filters="arc-list" role="group" aria-label="{{ cond $zh "按类型筛选文章" "Filter articles by type" }}">
+  <button type="button" data-filter="all" aria-pressed="true">{{ cond $zh "全部" "All" }} <em>{{ len $pages }}</em></button>
+  {{- range hugo.Data.story_categories.categories }}
+  {{- $n := len (where $pages "Params.category" .id) }}
+  {{- if $n }}<button type="button" data-filter="{{ .id }}" aria-pressed="false">{{ cond $zh .zh .en }} <em>{{ $n }}</em></button>{{ end }}
+  {{- end }}
+</div>
+<p class="sr" id="arc-list-count" aria-live="polite"></p>
+<nav class="arc__years" aria-label="{{ T "storiesYear" }}">{{ range $groups }}<a class="arc__year" href="#y{{ .Key }}" data-year="{{ .Key }}">{{ partial "year.html" .Key }} <em>{{ len (partial "stories/without-copies.html" .Pages) }}</em></a>{{ end }}</nav>
+<div id="arc-list" class="lg__in" data-arc>
 {{- range $groups }}
 <section class="card lgb arc" id="y{{ .Key }}" aria-labelledby="y{{ .Key }}-h"><h2 id="y{{ .Key }}-h">{{ partial "year.html" .Key }}</h2>
 <ul class="arc__list">
-  {{- range .Pages }}
-  <li><a class="arc__item" href="{{ .RelPermalink }}"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ if .Date.IsZero }}–{{ else if $zh }}{{ printf "%d月%d日" (int .Date.Month) .Date.Day }}{{ else }}{{ .Date.Format "2 Jan" }}{{ end }}</time><span{{ if findRE `\p{Han}` .Title 1 }} lang="zh-CN"{{ end }}>{{ .Title }}</span></a></li>
+  {{- range partial "stories/without-copies.html" .Pages }}
+  {{- $cat := partial "stories/category.html" .Params.category }}
+  <li data-tags="{{ .Params.category | default "none" }}"><a class="arc__item" href="{{ .RelPermalink }}"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ if .Date.IsZero }}–{{ else if $zh }}{{ printf "%d月%d日" (int .Date.Month) .Date.Day }}{{ else }}{{ .Date.Format "2 Jan" }}{{ end }}</time><span{{ if findRE `\p{Han}` .Title 1 }} lang="zh-CN"{{ end }}>{{ .Title }}{{ with $cat }}<em class="tag">{{ cond $zh .zh .en }}</em>{{ end }}</span></a></li>
   {{- end }}
 </ul>
 </section>
 {{- end }}
+</div>
 </div></div>
 {{ end }}

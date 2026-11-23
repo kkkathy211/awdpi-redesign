@@ -1,17 +1,21 @@
 // Internal form for syncing WeChat articles to the website.
 //   GET  /                     install page with the bookmark and instructions
 //   POST /capture              the bookmark posts the open article here; keeps it as a draft, shows the confirm form
-//   POST /submit               team password + original/reprint choice; queues the import and starts the workflow
+//   POST /submit               team password + original/reprint choice + category; queues the import and starts the workflow
 //   GET  /status/<id>          progress page
 //   GET  /status/<id>/data     progress as JSON (written by the GitHub workflow)
-// Article text is never logged. Drafts expire after 2 days, submissions and progress after 90 (bucket lifecycle).
+// The confirm form suggests a category with a model on Bedrock (classify.mjs); the categories are read from
+// data/story_categories.json in the website repository. Article text is never logged. Drafts expire after 2 days, submissions and progress after 90 (bucket lifecycle).
 import { createHash, randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
 import fs from "node:fs";
 import { GetObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { GetParameterCommand, SSMClient } from "@aws-sdk/client-ssm";
+import { BedrockRuntimeClient } from "@aws-sdk/client-bedrock-runtime";
+import { classify, plainText } from "./classify.mjs";
 
 const s3 = new S3Client({});
 const ssm = new SSMClient({});
+const bedrock = new BedrockRuntimeClient({ maxAttempts: 2 });
 const { BUCKET, REPO, WORKFLOW, SITE_URL, PASSWORD_PARAM, TOKEN_PARAM } = process.env;
 const ALLOWED_BIZ = (process.env.ALLOWED_BIZ || "").split(",").map((s) => s.trim()).filter(Boolean);
 const MAX_BODY = 5.5 * 1024 * 1024;
@@ -63,6 +67,40 @@ async function param(name) {
   }
   params[name] = { value, until: Date.now() + 5 * 60 * 1000 };
   return value;
+}
+
+// ---------- categories ----------
+let categoryCache = { list: [], until: 0 };
+async function categories() {
+  if (categoryCache.until > Date.now()) return categoryCache.list;
+  try {
+    const r = await fetch(`https://raw.githubusercontent.com/${REPO}/main/data/story_categories.json`, { signal: AbortSignal.timeout(3000) });
+    if (r.ok) categoryCache = { list: (await r.json()).categories || [], until: Date.now() + 5 * 60 * 1000 };
+  } catch {
+    // keep the last list
+  }
+  return categoryCache.list;
+}
+
+async function suggest(article, cats) {
+  if (!cats.length) return null;
+  try {
+    const r = await classify(bedrock, cats, { title: article.title, html: article.html }, { timeoutMs: 12000 });
+    log("classified", { category: r.category, confidence: r.confidence, inTok: r.inputTokens, outTok: r.outputTokens });
+    return r.category ? r : null;
+  } catch (e) {
+    log("classify_failed", { name: e.name });
+    return null;
+  }
+}
+
+// The card text: the summary set in the WeChat editor, unless WeChat just copied the start of the article into it;
+// then the excerpt the model copied from the article.
+function cardText(article, suggestion) {
+  const squash = (x) => String(x || "").replace(/\s+/g, "");
+  const desc = String(article.desc || "").replace(/\s+/g, " ").trim();
+  if (desc.length >= 10 && !squash(plainText(article.html)).startsWith(squash(desc).replace(/…+$|\.{3}$/, ""))) return desc.slice(0, 200);
+  return suggestion?.excerpt || "";
 }
 
 // ---------- the article ----------
@@ -210,10 +248,12 @@ async function capture(event) {
   }
   const derived = derive(article);
   const id = randomUUID();
-  await put(`drafts/${id}.json`, { id, createdAt: new Date().toISOString(), ...derived, article });
-  const already = await storyExists(derived.slug);
+  const cats = await categories();
+  const [already, suggestion] = await Promise.all([storyExists(derived.slug), suggest(article, cats)]);
+  const description = cardText(article, suggestion);
+  await put(`drafts/${id}.json`, { id, createdAt: new Date().toISOString(), ...derived, suggestion, description, article });
   log("captured", { id, slug: derived.slug, bytes: text.length });
-  return html(200, formPage({ id, article, d: derived, already }));
+  return html(200, formPage({ id, article, d: { ...derived, suggestion, description }, already, cats }));
 }
 
 async function submit(event) {
@@ -225,21 +265,26 @@ async function submit(event) {
   if (!draft) return html(410, message("这次提交已过期", "请回到公众号文章页面，重新点一次书签。"));
   const origin = form.get("origin");
   const authorised = form.get("authorised") === "yes";
+  const category = form.get("category") || "";
+  const cats = await categories();
   const errors = [];
   if (origin !== "original" && origin !== "reprint") errors.push("请选择这篇文章是原创还是转载。");
   if (origin === "reprint" && !authorised) errors.push("转载或改编的文章，要先取得原作者或原公众号的授权，再勾选确认。");
+  // Without the category list (GitHub unreachable) the article is imported without a category.
+  if (cats.length && !cats.some((c) => c.id === category)) errors.push("请选择分类。");
   if (!(await checkPassword(form.get("password") || ""))) errors.push("团队密码不对。");
   if (errors.length) {
     log("submit_rejected", { id, count: errors.length });
-    return html(400, formPage({ id, article: draft.article, d: draft, already: null, errors, origin, authorised }));
+    return html(400, formPage({ id, article: draft.article, d: draft, already: null, errors, origin, authorised, category, cats }));
   }
   const now = new Date().toISOString();
   await put(`inbox/${id}.json`, {
-    id, slug: draft.slug, date: draft.date, url: draft.url, origin, authorised, submittedAt: now, article: draft.article,
+    id, slug: draft.slug, date: draft.date, url: draft.url, origin, authorised, category, description: draft.description || "",
+    submittedAt: now, article: draft.article,
   });
   const started = await dispatch(id);
   await put(`status/${id}.json`, { state: started ? "queued" : "waiting", title: draft.article.title, url: draft.url, at: now });
-  log("submitted", { id, slug: draft.slug, started });
+  log("submitted", { id, slug: draft.slug, category, aiCategory: draft.suggestion?.category || null, started });
   return { statusCode: 303, headers: { Location: `/status/${id}` }, body: "" };
 }
 
@@ -267,7 +312,7 @@ p{margin:0 0 12px}.muted{color:var(--muted);font-size:14px}.card{background:var(
 .title{font-size:20px;font-weight:600;line-height:1.4;margin:0 0 8px}dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:0;font-size:15px}dt{color:var(--muted)}dd{margin:0;overflow-wrap:anywhere}
 .note{border-radius:10px;padding:12px 14px;margin:14px 0;font-size:15px}.warn{background:var(--warn-bg);color:var(--warn)}.err{background:var(--err-bg);color:var(--accent)}
 fieldset{border:0;padding:0;margin:0 0 16px}legend{font-weight:600;margin-bottom:8px}label.opt{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;cursor:pointer}
-label.opt input{margin-top:5px}input[type=password]{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+label.opt input{margin-top:5px}select,input[type=password]{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
 button,.btn{display:inline-block;font:inherit;font-weight:600;padding:11px 22px;border-radius:999px;border:0;background:var(--accent);color:#fff;cursor:pointer;text-decoration:none}
 .bm{font-size:17px;padding:12px 26px;cursor:grab}ol{padding-left:22px;margin:0 0 12px}li{margin-bottom:6px}textarea{width:100%;height:84px;font:12px/1.4 ui-monospace,Menlo,monospace;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--bg);color:var(--ink)}
 .state{font-size:20px;font-weight:600;margin:0 0 8px}.state.ok{color:var(--ok)}.state.bad{color:var(--accent)}a{color:var(--accent)}kbd{font:13px ui-monospace,Menlo,monospace;border:1px solid var(--line);border-radius:5px;padding:1px 5px}
@@ -319,9 +364,13 @@ function installPage(endpoint) {
   return [layout("公众号文章同步到官网", body, nonce, script), nonce];
 }
 
-function formPage({ id, article: a, d, already, errors = [], origin, authorised }) {
+function formPage({ id, article: a, d, already, errors = [], origin, authorised, category, cats = [] }) {
   const cover = imageUrl(a.cover);
   const chosen = origin || (d.original && !d.hints.length ? "original" : "");
+  const ai = d.suggestion;
+  const pickedCat = category ?? ai?.category ?? "";
+  const aiCat = ai && cats.find((c) => c.id === ai.category);
+  const sure = { high: "很确定", medium: "不太确定", low: "没把握" };
   const body = `
 <h1>同步到官网</h1>
 <p class="muted">核对下面的信息，确认后发布到 AWDPI 官网。</p>
@@ -336,6 +385,7 @@ ${cover ? `<img class="cover" src="${esc(cover)}" alt="">` : ""}
 <dt>网站地址</dt><dd>${esc(d.url)}</dd>
 </dl>
 <p class="muted" style="margin-top:12px">${esc(d.excerpt)}${d.chars > d.excerpt.length ? "……" : ""}</p>
+${d.description ? `<p class="muted"><strong>网站卡片上的介绍：</strong>${esc(d.description)}</p>` : ""}
 </div>
 ${already ? `<div class="note warn">网站上已经有这篇文章。提交后，网站上的那篇会换成公众号上现在的版本。</div>` : ""}
 ${d.hints.length ? `<div class="note warn">这篇文章可能是转载的。${d.hints.map(esc).join("；")}</div>` : ""}
@@ -346,6 +396,12 @@ ${d.hints.length ? `<div class="note warn">这篇文章可能是转载的。${d.
 <label class="opt"><input type="radio" name="origin" value="reprint"${chosen === "reprint" ? " checked" : ""}><span>转载或改编自别人的文章</span></label>
 <label class="opt"><input type="checkbox" name="authorised" value="yes"${authorised ? " checked" : ""}><span>是转载的话：我确认已经取得原作者或原公众号的授权，可以发到 AWDPI 官网上</span></label>
 </fieldset>
+${cats.length ? `<p><label for="cat"><strong>分类</strong></label></p>
+<p><select id="cat" name="category" required>
+<option value="">请选择</option>
+${cats.map((c) => `<option value="${esc(c.id)}"${c.id === pickedCat ? " selected" : ""}>${esc(c.zh)}</option>`).join("")}
+</select></p>
+<p class="muted">${aiCat ? `AI 建议：${esc(aiCat.zh)}（${sure[ai.confidence] || ""}${ai.reason ? `：${esc(ai.reason)}` : ""}）。不对的话请改。` : "请选择这篇文章的分类。"}</p>` : ""}
 <p><label for="pw"><strong>团队密码</strong></label></p>
 <p><input type="password" id="pw" name="password" autocomplete="current-password" required></p>
 <p><button type="submit">发布到官网</button></p>

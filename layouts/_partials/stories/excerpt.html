@@ -1,0 +1,5 @@
+{{- /* One or two sentences for a card: the description (copied from the article, see tools/wechat-sync/README.md),
+       otherwise the start of the text. */ -}}
+{{- $d := .Description -}}
+{{- if not $d }}{{ $d = .Plain | replaceRE `\s+` " " | strings.TrimSpace | truncate 100 }}{{ end -}}
+{{- return $d -}}

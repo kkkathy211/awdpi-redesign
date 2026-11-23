@@ -110,20 +110,38 @@ const headStuck = () => { const h = document.querySelector('.site'); return h ? 
   els.forEach(el => io.observe(el));
 })();
 
-// Filter chips (research table, stories grid).
+// Filter chips (research table, stories grid, list of all articles).
+// A list with data-explicit-all shows under "All" only the items tagged "all" (the stories grid: the newest articles).
+// A button's data-more / data-more-label update the list's "see all" link (data-more-link).
+// In the list of all articles (data-arc), years without a match are hidden, and #cat-<id> in the address picks a filter.
 (() => {
   document.querySelectorAll('[data-filters]').forEach(bar => {
     const list = document.getElementById(bar.dataset.filters);
     if (!list) return;
     const items = [...list.querySelectorAll('[data-tags]')];
-    bar.addEventListener('click', e => {
-      const b = e.target.closest('button'); if (!b) return;
+    const explicitAll = list.hasAttribute('data-explicit-all');
+    const more = list.parentElement.querySelector('[data-more-link]');
+    const pick = b => {
       bar.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
       const f = b.dataset.filter;
-      items.forEach(it => { it.hidden = f !== 'all' && !it.dataset.tags.split(' ').includes(f); });
+      items.forEach(it => { const t = it.dataset.tags.split(' '); it.hidden = !(t.includes(f) || (f === 'all' && !explicitAll)); });
+      if (more && b.dataset.more) { more.href = b.dataset.more; more.firstChild.textContent = b.dataset.moreLabel + ' '; }
+      if (list.hasAttribute('data-arc')) {
+        list.querySelectorAll('.arc').forEach(sec => {
+          const n = sec.querySelectorAll('[data-tags]:not([hidden])').length;
+          sec.hidden = !n;
+          const y = document.querySelector(`.arc__year[href="#${sec.id}"]`);
+          if (y) { y.hidden = !n; y.querySelector('em').textContent = n; }
+        });
+        history.replaceState(null, '', f === 'all' ? location.pathname : `#cat-${f}`);
+      }
       const live = document.getElementById(bar.dataset.filters + '-count');
       if (live) { const n = items.filter(i => !i.hidden).length; live.textContent = document.documentElement.lang.startsWith('zh') ? `显示 ${n} 项` : n + ' shown'; }
-    });
+    };
+    bar.addEventListener('click', e => { const b = e.target.closest('button'); if (b) pick(b); });
+    const m = location.hash.match(/^#cat-([a-z]+)$/);
+    const start = m && bar.querySelector(`[data-filter="${m[1]}"]`);
+    if (start && list.hasAttribute('data-arc')) pick(start);
   });
 })();
 

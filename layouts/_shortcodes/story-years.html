@@ -1,0 +1,36 @@
+{{- /* Articles per year, as a bar chart (the card on the stories page). Counts come from the articles themselves. */ -}}
+{{- $zh := eq site.Language.Lang "zh-cn" -}}
+{{- $pages := partial "stories/pages.html" . -}}
+{{- $counts := dict -}}
+{{- $total := 0 -}}
+{{- $min := now -}}
+{{- range $pages }}{{ if not .Date.IsZero }}
+  {{- $y := .Date.Format "2006" }}
+  {{- $counts = merge $counts (dict $y (add (index $counts $y | default 0) 1)) }}
+  {{- $total = add $total 1 }}
+  {{- if .Date.Before $min }}{{ $min = .Date }}{{ end }}
+{{- end }}{{ end -}}
+{{- $max := 1 -}}{{ range $counts }}{{ if gt . $max }}{{ $max = . }}{{ end }}{{ end -}}
+{{- $scale := add (mul (math.Ceil (div (float $max) 50)) 50) 10 -}}
+{{- $firstYear := $min.Format "2006" -}}
+{{- $lastYear := "" -}}{{ range $y, $_ := $counts }}{{ $lastYear = $y }}{{ end -}}
+{{- $partial := ne $min.Month 1 -}}
+<div class="card chart2" data-yearchart data-reveal>
+  <div class="chart2__big"><b data-yc-n>{{ $total }}</b><span data-yc-l>{{ if $zh }}篇文章（{{ $firstYear }}年{{ if $partial }}{{ int $min.Month }}月{{ end }}至{{ $lastYear }}年）{{ else }}articles from {{ if $partial }}{{ $min.Format "January" }} {{ end }}{{ $firstYear }} to {{ $lastYear }}{{ end }}</span></div>
+  <div class="chart2__plot"><div class="chart2__grid" aria-hidden="true">
+    {{- range seq 50 50 (sub (int $scale) 1) }}<span style="--y:{{ printf "%.2f" (mul (div (float .) $scale) 100) }}%"><em>{{ . }}</em></span>{{ end -}}
+  </div>
+  {{- $k := 0 }}
+  {{- range $y, $n := $counts }}
+    {{- $long := cond $zh (printf "篇文章（%s年）" $y) (printf "articles in %s" $y) }}
+    {{- if and $partial (eq $y $firstYear) }}
+      {{- $long = cond $zh (printf "篇文章（%s年%d–12月）" $y (int $min.Month)) (printf "articles from %s to December %s" ($min.Format "January") $y) }}
+    {{- end }}
+    <button type="button" class="chart2__bar" data-n="{{ $n }}" data-l="{{ $long }}" aria-label="{{ cond $zh (printf "%s年：%d 篇" $y $n) (printf "%s: %d articles" $y $n) }}" style="--h:{{ printf "%.1f" (mul (div (float $n) $scale) 100) }}%;--k:{{ $k }}"><span class="chart2__v">{{ $n }}</span><i></i></button>
+    {{- $k = add $k 1 }}
+  {{- end }}</div>
+  <div class="chart2__years" aria-hidden="true">
+    {{- range $y, $_ := $counts }}<span>{{ $y }}{{ if and $partial (eq $y $firstYear) }}<small>{{ if $zh }}{{ int $min.Month }}–12月{{ else }}{{ $min.Format "Jan" }}–Dec{{ end }}</small>{{ end }}</span>{{ end -}}
+  </div>
+  <p class="chart2__hint"><span class="on-hover">{{ cond $zh "把鼠标移到柱子上，查看当年的数量。" "Point at a bar to see that year." }}</span><span class="on-touch">{{ cond $zh "点按柱子，查看当年的数量。" "Tap a bar to see that year." }}</span></p>
+</div>

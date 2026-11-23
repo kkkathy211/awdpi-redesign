@@ -1,0 +1,3 @@
+{{- /* Number of articles in this language: {{< story-count >}}, or published in one year: {{< story-count year="2025" >}}. */ -}}
+{{- $pages := partial "stories/pages.html" . -}}
+{{- with .Get "year" }}{{ $y := int . }}{{ $n := 0 }}{{ range $pages }}{{ if eq .Date.Year $y }}{{ $n = add $n 1 }}{{ end }}{{ end }}{{ $n }}{{ else }}{{ len $pages }}{{ end -}}

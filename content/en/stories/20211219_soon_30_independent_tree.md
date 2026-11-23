@@ -1,6 +1,7 @@
 ---
 title: "Soon 30, I Want to Become an Independently Standing Tree"
 date: 2021-12-19
+category: her
 image: /media/stories/20211219_soon_30/cover.jpg
 ---
 <div class="d-flex bg-warning m-4">

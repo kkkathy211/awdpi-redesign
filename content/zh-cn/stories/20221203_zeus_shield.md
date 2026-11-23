@@ -1,6 +1,8 @@
 ---
 title: "Avoice她视角丨正当防卫：女性反家暴的“宙斯之盾”"
 date: 2022-12-03
+category: her
+description: "作为反抗家暴的有效手段，“正当防卫”一词经常出现在受害者的辩词中，以及司法审判的公堂上。但当暴力来袭时，盲目采取自卫行动却可能反转成为受害者的罪证，打破原本胜负分明的赢局，让弱势群体立于危墙之下。"
 image: /media/stories/20221203_Zeus_Shield/cover.png
 ---
 <img src="/media/stories/shared/05d09d09f3dc2df9.gif" class="mx-auto d-block" width="60%" />

@@ -1,0 +1,4 @@
+{{- /* The newest articles as cards, for the home page: {{< story-cards 3 >}}. */ -}}
+{{- range first (.Get 0 | default 3 | int) (partial "stories/pages.html" .) }}
+{{ partial "stories/card.html" (dict "page" .) }}
+{{- end }}

@@ -1,0 +1,7 @@
+{{- /* Links to the categories marked "hero" in data/story_categories.json; each one filters the latest articles below. */ -}}
+{{- $zh := eq site.Language.Lang "zh-cn" -}}
+<ul class="arts__kinds">
+{{- range where hugo.Data.story_categories.categories "hero" true -}}
+<li><a class="c-{{ .colour }}" href="#story-grid" data-goto-filter="{{ .id }}"><span><b>{{ cond $zh .zh .en }}</b><span>{{ cond $zh .zhNote .enNote }}</span></span>{{ partial "icon.html" "arrow" }}</a></li>
+{{- end -}}
+</ul>

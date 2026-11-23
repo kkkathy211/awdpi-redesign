@@ -57,7 +57,7 @@ jobs:
           cache: npm
           cache-dependency-path: tools/wechat-sync/package-lock.json
       - name: Install the importer
-        run: npm ci --prefix tools/wechat-sync --no-audit --no-fund
+        run: npm ci --prefix tools/wechat-sync --omit=dev --no-audit --no-fund
       - name: Download the submission
         run: aws s3 cp "s3://$BUCKET/inbox/$ID.json" "$RUNNER_TEMP/submission.json" --only-show-errors
       - name: Import

@@ -1,6 +1,7 @@
 ---
 title: "Self-Defense: Aegis of Women Against Domestic Violence"
 date: 2022-12-03
+category: resources
 image: /media/stories/20221203_Zeus_Shield/cover.png
 ---
 <img src="/media/stories/shared/05d09d09f3dc2df9.gif" class="mx-auto d-block" width="60%" />

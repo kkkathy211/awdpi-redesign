@@ -1,6 +1,8 @@
 ---
 title: "Avoice · 她视角｜扭曲的关系和沉默的攻击 ——《女孩们的地下战争》"
 date: 2022-10-03
+category: her
+description: "女孩们之间的攻击以更为间接的形式藏匿于亲密关系之中，并且更多出现于敏感脆弱的青春期阶段。这种由于社会畸形规训而产生的攻击方式对霸凌者与被霸凌者来说，都是一种极具危险性的存在…"
 image: /media/stories/20221003_odd_girl_out/cover.png
 ---
 <img src="/media/stories/shared/05d09d09f3dc2df9.gif" class="mx-auto d-block" width="60%" />

@@ -123,6 +123,10 @@ Resources:
               Effect: Allow
               Action: s3:ListBucket
               Resource: !GetAtt Bucket.Arn
+            - Sid: SuggestCategory
+              Effect: Allow
+              Action: bedrock:InvokeModel
+              Resource: !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/deepseek.v3.2
             - Sid: Secrets
               Effect: Allow
               Action: ssm:GetParameter
