@@ -1,7 +1,7 @@
 ---
 title: "她视角｜数说暴力：数字背后，是全球无数女性赤裸裸的人生境遇"
 date: 2022-09-25
-category: world
+category: her
 description: "16年前 ，联合国大会通过了一项决议，呼吁加紧努力消除一切形式的暴力侵害妇女行为，并请联合国秘书长建立了一个数据库，以此说明暴力侵害妇女行为的程度、性质和后果，探讨消除暴力行为的政策方案所产生的影响和效力。"
 image: /media/stories/20220925_violence_behind_data/cover.png
 ---

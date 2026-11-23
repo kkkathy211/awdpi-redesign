@@ -1,7 +1,7 @@
 ---
 title: "The \"Sleeping Bag Lady\" - Don't Wallow in Sadness. Look Forward."
 date: 2022-12-05
-category: her
+category: people
 description: "For her love of camping, she calls herself the \"sleeping bag lady\". Her mental grit and optimism kept her positive throughout the trials and tribulations of camping…"
 image: /media/stories/20221205_sleeping_bag_lady/cover.png
 ---

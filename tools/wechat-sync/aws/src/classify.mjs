@@ -1,6 +1,8 @@
 // Suggests a category and a short excerpt for an article, using a model on Amazon Bedrock (eu-north-1).
 // Used by the internal form (index.mjs) for new articles and by classify-all.mjs for existing ones.
-// The categories and their definitions come from data/story_categories.json in the website repository.
+// The categories, their definitions and the column rules come from data/story_categories.json in the website repository:
+// a rule with `category` decides by the column name in the title without asking the model; a rule with `only`
+// limits the model's choice; a category with `titleMust` is only possible when the title contains that text.
 import { ConverseCommand } from "@aws-sdk/client-bedrock-runtime";
 
 export const MODEL_ID = "deepseek.v3.2";
@@ -41,14 +43,30 @@ ${text}
 
 const squash = (s) => String(s || "").replace(/\s+/g, "");
 
-// Returns { category, confidence, reason, excerpt, inputTokens, outputTokens }; category is null when the reply was unusable.
-export async function classify(bedrock, categories, { title, html, text }, { timeoutMs = 20000 } = {}) {
+// Which categories this title may have: { fixed: id or null, allowed: [category], rule: matched text }.
+export function choices(categories, rules, title) {
+  const t = String(title || "");
+  let allowed = categories.filter((c) => !c.titleMust || t.includes(c.titleMust));
+  for (const r of rules || []) {
+    const m = t.match(new RegExp(r.title));
+    if (!m) continue;
+    if (r.category) return { fixed: r.category, allowed: categories.filter((c) => c.id === r.category), rule: m[0] };
+    if (r.only) allowed = allowed.filter((c) => r.only.includes(c.id));
+    return { fixed: null, allowed, rule: m[0] };
+  }
+  return { fixed: null, allowed, rule: "" };
+}
+
+// Returns { category, source ("rule" or "ai"), confidence, reason, excerpt, inputTokens, outputTokens };
+// category is null when the reply was unusable. The model is asked even when a rule decides, for the excerpt.
+export async function classify(bedrock, categories, { title, html, text }, { timeoutMs = 20000, rules = [] } = {}) {
+  const { fixed, allowed, rule } = choices(categories, rules, title);
   const body = (text ?? plainText(html)).slice(0, TEXT_CHARS);
   const out = await bedrock.send(
     new ConverseCommand({
       modelId: MODEL_ID,
       system: [{ text: "你帮 AWDPI（亚裔女性国际发展计划，一个支持海外亚裔女性的非营利组织）的网站给公众号文章分类。只回复一个 JSON 对象，不要其他文字。" }],
-      messages: [{ role: "user", content: [{ text: prompt(categories, title, body) }] }],
+      messages: [{ role: "user", content: [{ text: prompt(allowed, title, body) }] }],
       inferenceConfig: { maxTokens: 400, temperature: 0 },
     }),
     { abortSignal: AbortSignal.timeout(timeoutMs) },
@@ -59,23 +77,27 @@ export async function classify(bedrock, categories, { title, html, text }, { tim
   try {
     data = JSON.parse((reply.match(/\{[\s\S]*\}/) || ["{}"])[0]);
   } catch {
-    return { category: null, confidence: "low", reason: "模型回复无法解析", excerpt: "", ...usage };
+    data = {};
   }
-  const ids = new Set(categories.map((c) => c.id));
+  if (fixed) return { category: fixed, source: "rule", confidence: "high", reason: `按栏目名“${rule}”`, excerpt: checkedExcerpt(data.excerpt, html ?? text), ...usage };
+  const ids = new Set(allowed.map((c) => c.id));
   const category = ids.has(data.category) ? data.category : null;
   const confidence = ["high", "medium", "low"].includes(data.confidence) ? data.confidence : "low";
-  // Only keep an excerpt that really is in the article, so nothing the model wrote itself appears on the site.
-  // The model sometimes ends the excerpt with a full stop where the article goes on: compare without the final
-  // punctuation and end the excerpt the way the article does (or with an ellipsis).
-  let excerpt = "";
-  const core = String(data.excerpt || "").replace(/\s+/g, " ").trim().replace(/[。，、；：,.;:!！?？…\s]+$/u, "");
-  if (core.length >= 15 && core.length <= 200) {
-    const flat = squash(plainText(html ?? text));
-    const at = flat.indexOf(squash(core));
-    if (at >= 0) {
-      const next = flat[at + squash(core).length] || "";
-      excerpt = core + (/[。！？!?]/.test(next) ? next : "…");
-    }
-  }
-  return { category, confidence: category ? confidence : "low", reason: String(data.reason || "").slice(0, 80), excerpt, ...usage };
+  return {
+    category, source: "ai", confidence: category ? confidence : "low", reason: String(data.reason || "").slice(0, 80),
+    excerpt: checkedExcerpt(data.excerpt, html ?? text), ...usage,
+  };
+}
+
+// Only keep an excerpt that really is in the article, so nothing the model wrote itself appears on the site.
+// The model sometimes ends the excerpt with a full stop where the article goes on: compare without the final
+// punctuation and end the excerpt the way the article does (or with an ellipsis).
+function checkedExcerpt(raw, source) {
+  const core = String(raw || "").replace(/\s+/g, " ").trim().replace(/[。，、；：,.;:!！?？…\s]+$/u, "");
+  if (core.length < 15 || core.length > 200) return "";
+  const flat = squash(plainText(source));
+  const at = flat.indexOf(squash(core));
+  if (at < 0) return "";
+  const next = flat[at + squash(core).length] || "";
+  return core + (/[。！？!?]/.test(next) ? next : "…");
 }

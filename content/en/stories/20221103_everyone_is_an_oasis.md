@@ -1,7 +1,7 @@
 ---
 title: "With the courage to follow one’s heart and an independent self, everyone can be an oasis"
 date: 2022-11-03
-category: her
+category: people
 description: "Evelyn is a professional psychologist with knowledge of landscape architecture. She seems to be very special to have been given a mission to \"save others\" even before she was born…"
 image: /media/stories/20221103_everyone_is_an_oasis/cover.png
 ---

@@ -11,7 +11,7 @@ import fs from "node:fs";
 import { GetObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { GetParameterCommand, SSMClient } from "@aws-sdk/client-ssm";
 import { BedrockRuntimeClient } from "@aws-sdk/client-bedrock-runtime";
-import { classify, plainText } from "./classify.mjs";
+import { choices, classify, plainText } from "./classify.mjs";
 
 const s3 = new S3Client({});
 const ssm = new SSMClient({});
@@ -70,23 +70,32 @@ async function param(name) {
 }
 
 // ---------- categories ----------
-let categoryCache = { list: [], until: 0 };
-async function categories() {
-  if (categoryCache.until > Date.now()) return categoryCache.list;
+let categoryCache = { list: [], rules: [], until: 0 };
+async function loadCategories() {
+  if (categoryCache.until > Date.now()) return categoryCache;
   try {
     const r = await fetch(`https://raw.githubusercontent.com/${REPO}/main/data/story_categories.json`, { signal: AbortSignal.timeout(3000) });
-    if (r.ok) categoryCache = { list: (await r.json()).categories || [], until: Date.now() + 5 * 60 * 1000 };
+    if (r.ok) {
+      const d = await r.json();
+      categoryCache = { list: d.categories || [], rules: d.rules || [], until: Date.now() + 5 * 60 * 1000 };
+    }
   } catch {
     // keep the last list
   }
-  return categoryCache.list;
+  return categoryCache;
+}
+// The categories an article may have: all of them except those whose `titleMust` text is not in the title.
+async function categories(title) {
+  const { list, rules } = await loadCategories();
+  const allowed = choices(list, [], title).allowed;
+  return { list: allowed.length ? allowed : list, rules };
 }
 
-async function suggest(article, cats) {
+async function suggest(article, cats, rules) {
   if (!cats.length) return null;
   try {
-    const r = await classify(bedrock, cats, { title: article.title, html: article.html }, { timeoutMs: 12000 });
-    log("classified", { category: r.category, confidence: r.confidence, inTok: r.inputTokens, outTok: r.outputTokens });
+    const r = await classify(bedrock, cats, { title: article.title, html: article.html }, { timeoutMs: 12000, rules });
+    log("classified", { category: r.category, source: r.source, inTok: r.inputTokens, outTok: r.outputTokens });
     return r.category ? r : null;
   } catch (e) {
     log("classify_failed", { name: e.name });
@@ -248,8 +257,8 @@ async function capture(event) {
   }
   const derived = derive(article);
   const id = randomUUID();
-  const cats = await categories();
-  const [already, suggestion] = await Promise.all([storyExists(derived.slug), suggest(article, cats)]);
+  const { list: cats, rules } = await categories(article.title);
+  const [already, suggestion] = await Promise.all([storyExists(derived.slug), suggest(article, cats, rules)]);
   const description = cardText(article, suggestion);
   await put(`drafts/${id}.json`, { id, createdAt: new Date().toISOString(), ...derived, suggestion, description, article });
   log("captured", { id, slug: derived.slug, bytes: text.length });
@@ -266,7 +275,7 @@ async function submit(event) {
   const origin = form.get("origin");
   const authorised = form.get("authorised") === "yes";
   const category = form.get("category") || "";
-  const cats = await categories();
+  const { list: cats } = await categories(draft.article.title);
   const errors = [];
   if (origin !== "original" && origin !== "reprint") errors.push("请选择这篇文章是原创还是转载。");
   if (origin === "reprint" && !authorised) errors.push("转载或改编的文章，要先取得原作者或原公众号的授权，再勾选确认。");
@@ -400,7 +409,7 @@ ${cats.length ? `<p><label for="cat"><strong>分类</strong></label></p>
 <option value="">请选择</option>
 ${cats.map((c) => `<option value="${esc(c.id)}"${c.id === pickedCat ? " selected" : ""}>${esc(c.zh)}</option>`).join("")}
 </select></p>
-<p class="muted">${aiCat ? `AI 建议：${esc(aiCat.zh)}${ai.reason ? `（${esc(ai.reason)}）` : ""}。不对的话请改。` : "请选择这篇文章的分类。"}</p>` : ""}
+<p class="muted">${aiCat ? `${ai.source === "rule" ? "按栏目名自动选好" : "AI 建议"}：${esc(aiCat.zh)}${ai.reason ? `（${esc(ai.reason)}）` : ""}。不对的话请改。` : "请选择这篇文章的分类。"}</p>` : ""}
 <p><label for="pw"><strong>团队密码</strong></label></p>
 <p><input type="password" id="pw" name="password" autocomplete="current-password" required></p>
 <p><button type="submit">发布到官网</button></p>

@@ -94,7 +94,7 @@ image: /media/stories/<名称>/cover.webp
 
 **同步公众号文章**：宣传组发完文章后，在电脑浏览器里打开文章，点书签"同步到官网"，核对后输入团队密码提交，大约 3 分钟后文章出现在网站上。书签的安装和使用说明在内部表单的首页。导入工作流（`.github/workflows/wechat-import.yml`）按上面"加一篇文章"的规则生成文章和图片，并直接提交到 main。管理和排错见 `tools/wechat-sync/README.md`。
 
-**改文章分类**：分错的文章，改它开头的 `category` 就行。增删分类或改名称、说明，编辑 `data/story_categories.json`（文件开头有说明）。旧文章的分类是 AI 先分好、再由宣传组核对的；以后同步进来的文章，由编辑在同步时确认分类。重新让 AI 给文章分类的办法见 `tools/wechat-sync/README.md`。
+**改文章分类**：分错的文章，改它开头的 `category` 就行。增删分类或改名称、说明，编辑 `data/story_categories.json`（文件开头有说明）。固定栏目也写在这个文件的 `rules` 里：例如标题有"她视角"的一律归她视角，观察月刊和编译归研究与编译，十六日行动和公益课堂归活动；推荐和合作栏目由 AI 按内容在几类里选。旧文章的分类是 AI 先分好、再由宣传组核对的；以后同步进来的文章，由编辑在同步时确认分类。重新让 AI 给文章分类的办法见 `tools/wechat-sync/README.md`。
 
 **加一份研究报告**：PDF 放进 `static/reports/`，封面放进 `static/img/report-<id>.jpg`，再在 `content/en/research/` 和 `content/zh-cn/research/` 各加一个 `<id>.md`（照现有文件的格式），并在两种语言的研究页（`research/_index.html`）列表里加一行。
 

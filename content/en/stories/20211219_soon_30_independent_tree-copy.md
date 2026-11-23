@@ -1,7 +1,7 @@
 ---
 title: "Avoice专访 | 马上三十岁的我，要做一棵不依赖任何人的树"
 date: 2021-12-19
-category: her
+category: people
 description: "Catherine一直生活在澳洲，从按部就班地上学读书，再到自由创业、创办30+女性播客，遭受家暴伤害的她，通过不断地反思与尝试，探索属于自己的疗愈方式，如今独立且潇洒地在自己的领域内熠熠生辉。"
 image: /media/stories/20211219_soon_30/cover.jpg
 ---

@@ -20,7 +20,7 @@ if (!repoArg || !resultsPath) {
   process.exit(2);
 }
 const repo = path.resolve(repoArg);
-const { categories } = JSON.parse(fs.readFileSync(path.join(repo, "data/story_categories.json"), "utf8"));
+const { categories, rules = [] } = JSON.parse(fs.readFileSync(path.join(repo, "data/story_categories.json"), "utf8"));
 const bedrock = new BedrockRuntimeClient({ region: "eu-north-1", maxAttempts: 4 });
 // USD per million tokens for deepseek.v3.2 in eu-north-1 (same figures as the Avoice relay's cost gate).
 const PRICE_IN = 0.74, PRICE_OUT = 2.22;
@@ -65,7 +65,7 @@ async function worker() {
   while (todo.length) {
     const s = todo.shift();
     try {
-      const r = await classify(bedrock, categories, { title: field(s.front, "title"), html: s.body });
+      const r = await classify(bedrock, categories, { title: field(s.front, "title"), html: s.body }, { rules });
       const before = results[s.rel];
       results[s.rel] = excerpts && before
         ? { ...before, excerpt: r.excerpt, inputTokens: before.inputTokens + r.inputTokens, outputTokens: before.outputTokens + r.outputTokens }

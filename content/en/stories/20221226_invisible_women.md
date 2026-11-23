@@ -1,7 +1,8 @@
 ---
 title: "Until the gap in gender data is filled, please remain a \"difficult\" person——Invisible Women"
 date: 2022-12-26
-category: research
+category: resources
+description: "Therefore, as a researcher who has long been a voice for women and vulnerable groups, British writer Caroline collated a large amo…"
 image: /media/stories/20221226_Invisible_women/cover.png
 ---
 <img src="/media/stories/shared/05d09d09f3dc2df9.gif" class="mx-auto d-block" width="60%" />

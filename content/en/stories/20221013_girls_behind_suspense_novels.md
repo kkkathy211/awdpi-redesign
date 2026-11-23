@@ -1,7 +1,8 @@
 ---
 title: "Women’s journey into the abyss is uncovered in this suspense novel."
 date: 2022-10-13
-category: resources
+category: people
+description: "A book review of Scream \"It was extraordinarily sunny on the day you were born, so your dad decided to name you Yoko!\"…"
 image: /media/stories/20221013_girls_behind_suspense_novels/cover.png
 ---
 <img src="/media/stories/shared/05d09d09f3dc2df9.gif" class="mx-auto d-block" width="60%" />

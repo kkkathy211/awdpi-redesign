@@ -1,7 +1,7 @@
 ---
 title: "Distorted Relationships and Silent Aggression - \"Odd Girl Out\""
 date: 2022-10-03
-category: her
+category: resources
 description: "Aggression in girls often emerges insidiously in intimate relationships, especially during adolescence, when girls are more likely to be sensitive and vulnerable…"
 image: /media/stories/20221003_odd_girl_out/cover.png
 ---
