@@ -370,7 +370,6 @@ function formPage({ id, article: a, d, already, errors = [], origin, authorised,
   const ai = d.suggestion;
   const pickedCat = category ?? ai?.category ?? "";
   const aiCat = ai && cats.find((c) => c.id === ai.category);
-  const sure = { high: "很确定", medium: "不太确定", low: "没把握" };
   const body = `
 <h1>同步到官网</h1>
 <p class="muted">核对下面的信息，确认后发布到 AWDPI 官网。</p>
@@ -401,7 +400,7 @@ ${cats.length ? `<p><label for="cat"><strong>分类</strong></label></p>
 <option value="">请选择</option>
 ${cats.map((c) => `<option value="${esc(c.id)}"${c.id === pickedCat ? " selected" : ""}>${esc(c.zh)}</option>`).join("")}
 </select></p>
-<p class="muted">${aiCat ? `AI 建议：${esc(aiCat.zh)}（${sure[ai.confidence] || ""}${ai.reason ? `：${esc(ai.reason)}` : ""}）。不对的话请改。` : "请选择这篇文章的分类。"}</p>` : ""}
+<p class="muted">${aiCat ? `AI 建议：${esc(aiCat.zh)}${ai.reason ? `（${esc(ai.reason)}）` : ""}。不对的话请改。` : "请选择这篇文章的分类。"}</p>` : ""}
 <p><label for="pw"><strong>团队密码</strong></label></p>
 <p><input type="password" id="pw" name="password" autocomplete="current-password" required></p>
 <p><button type="submit">发布到官网</button></p>
