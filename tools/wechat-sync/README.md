@@ -18,7 +18,8 @@ GitHub 工作流 wechat-import.yml
 | 文件 | 作用 |
 | --- | --- |
 | `aws/src/bookmarklet.js` | 书签脚本。首页把它变成书签网址，改动后重新部署堆栈，编辑要重新拖一次书签 |
-| `aws/src/index.mjs` | 内部表单：首页、核对页、提交、进度页 |
+| `aws/src/index.mjs` | 内部表单：首页（书签安装页，按打开它的浏览器显示对应的说明）、核对页、提交、进度页 |
+| `aws/src/awdpi-logo.png`、`awdpi-favicon.png` | 页面上的标志和网页图标，从 `static/img/` 复制；页面不从别处加载任何东西，所以直接嵌进页面 |
 | `aws/src/classify.mjs` | 用 AI 建议分类和卡片介绍（AWS 斯德哥尔摩的 DeepSeek V3.2） |
 | `classify-all.mjs` | 给已有的全部文章分类 |
 | `translate.mjs` | 把文章翻译成英文，放进 `content/stories-en/` |

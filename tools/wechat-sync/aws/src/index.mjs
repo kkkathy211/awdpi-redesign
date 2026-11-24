@@ -31,6 +31,10 @@ const BOOKMARKLET = BOOKMARKLET_SOURCE
   .filter((line) => !/^\s*\/\//.test(line))
   .map((line) => line.trim())
   .join(" ");
+// Copies of static/img/awdpi-logo-zh.png and awdpi-favicon.png, inlined because the pages load nothing from elsewhere.
+const dataUri = (file) => `data:image/png;base64,${fs.readFileSync(new URL(file, import.meta.url)).toString("base64")}`;
+const LOGO = dataUri("./awdpi-logo.png");
+const FAVICON = dataUri("./awdpi-favicon.png");
 
 const log = (event, extra = {}) => console.log(JSON.stringify({ event, ...extra }));
 
@@ -264,7 +268,7 @@ export async function handler(event) {
   const endpoint = `https://${event.requestContext?.domainName}`;
   let m;
   try {
-    if (method === "GET" && path === "/") return html(200, ...installPage(endpoint));
+    if (method === "GET" && path === "/") return html(200, ...installPage(endpoint, event.headers?.["user-agent"] || ""));
     if (method === "POST" && path === "/capture") return await capture(event);
     if (method === "POST" && path === "/submit") return await submit(event);
     if (method === "GET" && path === "/session") return json(200, { remembered: await remembered(event) });
@@ -357,65 +361,191 @@ function imageUrl(raw) {
   }
 }
 
+// Colours follow the website (static/css/style.css, AWDPI brand guideline): cream page, coral buttons with dark text.
 const CSS = `
-:root{color-scheme:light dark;--bg:#f6f3ef;--card:#fff;--ink:#1d1a17;--muted:#6b635b;--line:#e4ddd5;--accent:#b2353b;--ok:#2f7d4f;--warn:#9a5b00;--warn-bg:#fff4e0;--err-bg:#fdecec}
-@media (prefers-color-scheme:dark){:root{--bg:#1a1816;--card:#24211e;--ink:#f1ede8;--muted:#b0a79d;--line:#3a3530;--accent:#e2686d;--ok:#6cc495;--warn:#f0b45c;--warn-bg:#3a2e1c;--err-bg:#3d2224}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",sans-serif}
-main{max-width:720px;margin:0 auto;padding:32px 16px 64px}h1{font-size:26px;line-height:1.3;margin:0 0 6px}h2{font-size:19px;margin:32px 0 10px}
-p{margin:0 0 12px}.muted{color:var(--muted);font-size:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin:18px 0}
-.cover{width:100%;aspect-ratio:2.35/1;object-fit:cover;border-radius:10px;background:var(--line);display:block;margin-bottom:14px}
+:root{color-scheme:light dark;--bg:#fbf7f1;--card:#fff;--sunk:#f5eee4;--ink:#26180e;--muted:#6e5d50;--line:#ecdfd0;--coral:#ff6e4f;--coral-h:#ff8466;--accent:#c4401c;--tint:#ffebe5;--ok:#2f7d4f;--warn:#8a4b00;--warn-bg:#fff2e3;--err:#bf210a;--err-bg:#ffe4df;--shadow:0 1px 2px rgba(70,35,10,.05),0 10px 30px rgba(70,35,10,.06)}
+@media (prefers-color-scheme:dark){:root{--bg:#1b1511;--card:#261e18;--sunk:#201913;--ink:#f7ede3;--muted:#c3b2a3;--line:#3b2f26;--accent:#ff9277;--tint:#3a221a;--ok:#6cc495;--warn:#f0b45c;--warn-bg:#3a2e1c;--err:#ff8f80;--err-bg:#3d2224;--shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.25)}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 -apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+main{max-width:760px;margin:0 auto;padding:16px 16px 64px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 0 16px;border-bottom:1px solid var(--line)}.logo{height:52px;width:auto;display:block}
+.tag{font-size:13px;color:var(--muted);background:var(--sunk);border:1px solid var(--line);border-radius:999px;padding:3px 12px;white-space:nowrap}
+h1{font-size:28px;line-height:1.3;margin:28px 0 6px}h2{font-size:20px;line-height:1.35;margin:32px 0 10px}h3{font-size:17px;line-height:1.45;margin:0 0 4px}
+p{margin:0 0 12px}.muted{color:var(--muted);font-size:14px}a{color:var(--accent)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:22px;margin:18px 0}
+.cover{width:100%;aspect-ratio:2.35/1;object-fit:cover;border-radius:14px;background:var(--line);display:block;margin-bottom:14px}
 .title{font-size:20px;font-weight:600;line-height:1.4;margin:0 0 8px}dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:0;font-size:15px}dt{color:var(--muted)}dd{margin:0;overflow-wrap:anywhere}
-.note{border-radius:10px;padding:12px 14px;margin:14px 0;font-size:15px}.warn{background:var(--warn-bg);color:var(--warn)}.note.ok{background:var(--bg);border:1px solid var(--line);color:var(--ok)}.err{background:var(--err-bg);color:var(--accent)}
-fieldset{border:0;padding:0;margin:0 0 16px}legend{font-weight:600;margin-bottom:8px}label.opt{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;cursor:pointer}
-label.opt input{margin-top:5px}select,input[type=password]{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
-button,.btn{display:inline-block;font:inherit;font-weight:600;padding:11px 22px;border-radius:999px;border:0;background:var(--accent);color:#fff;cursor:pointer;text-decoration:none}
-.bm{font-size:17px;padding:12px 26px;cursor:grab}ol{padding-left:22px;margin:0 0 12px}li{margin-bottom:6px}textarea{width:100%;height:84px;font:12px/1.4 ui-monospace,Menlo,monospace;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--bg);color:var(--ink)}
-.state{font-size:20px;font-weight:600;margin:0 0 8px}.state.ok{color:var(--ok)}.state.bad{color:var(--accent)}a{color:var(--accent)}kbd{font:13px ui-monospace,Menlo,monospace;border:1px solid var(--line);border-radius:5px;padding:1px 5px}
+.note{border-radius:14px;padding:12px 16px;margin:14px 0;font-size:15px}.warn{background:var(--warn-bg);color:var(--warn)}.note.ok{background:var(--sunk);border:1px solid var(--line);color:var(--ok)}.err{background:var(--err-bg);color:var(--err)}
+fieldset{border:0;padding:0;margin:0 0 16px}legend{font-weight:600;margin-bottom:8px}label.opt{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:14px;margin-bottom:8px;cursor:pointer}
+label.opt input{margin-top:6px;accent-color:var(--coral)}select,input[type=password]{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink)}
+button,.btn{display:inline-block;font:inherit;font-weight:700;padding:11px 24px;border-radius:999px;border:0;background:var(--coral);color:#26180e;cursor:pointer;text-decoration:none;box-shadow:0 6px 18px rgba(255,110,79,.28)}
+button:hover,.btn:hover{background:var(--coral-h)}button.btn2{background:transparent;color:var(--ink);border:1.5px solid var(--ink);box-shadow:none;padding:8px 18px;font-size:15px}button.btn2:hover{background:var(--ink);color:var(--bg)}
+ol,ul{padding-left:22px;margin:0 0 12px}li{margin-bottom:6px}textarea{width:100%;height:76px;font:12px/1.4 ui-monospace,Menlo,monospace;border:1px solid var(--line);border-radius:12px;padding:8px;background:var(--bg);color:var(--ink);resize:vertical}
+.state{font-size:20px;font-weight:600;margin:0 0 8px}.state.ok{color:var(--ok)}.state.bad{color:var(--err)}
+kbd{display:inline-block;font:600 13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-width:24px;text-align:center;background:var(--card);border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:0 6px;color:var(--ink)}
+.lead{font-size:17px;color:var(--muted);max-width:36em}
+.sec{background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:24px;margin:22px 0}.sec h2{margin:0}
+.sec-head{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;margin-bottom:22px}.badge{font-size:13px;font-weight:700;color:var(--accent);background:var(--tint);border-radius:999px;padding:2px 11px}.when{font-size:14px;color:var(--muted);margin-left:auto}
+.steps{list-style:none;padding:0;margin:0;counter-reset:s}.steps>li{position:relative;padding:0 0 24px 50px;margin:0;counter-increment:s}.steps>li:last-child{padding-bottom:0}
+.steps>li::before{content:counter(s);position:absolute;left:0;top:-2px;width:32px;height:32px;border-radius:50%;background:var(--tint);color:var(--accent);font-weight:700;font-size:15px;display:grid;place-items:center;transition:background .3s,color .3s}
+.steps>li:not(:last-child)::after{content:"";position:absolute;left:16px;top:38px;bottom:8px;width:1px;background:var(--line)}
+.steps p{margin:0 0 6px}.steps>li.next::before{background:var(--coral);color:#26180e;animation:pop .5s}@keyframes pop{50%{transform:scale(1.25)}}
+.seen{display:inline-block;font-size:13px;color:var(--muted);background:var(--sunk);border-radius:999px;padding:1px 10px;margin-bottom:6px}
+.dragarea{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:12px 0 10px}@media (max-width:640px){.dragarea{grid-template-columns:1fr}}
+.zone{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-height:190px;padding:18px;border:2px dashed var(--line);border-radius:16px;background:var(--sunk);text-align:center}
+.hint{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--accent)}.hint svg{width:16px;height:16px;animation:up 1.6s ease-in-out infinite}@keyframes up{0%,100%{transform:translateY(2px)}50%{transform:translateY(-4px)}}
+a.bm{display:inline-flex;align-items:center;gap:10px;font-size:18px;font-weight:700;padding:14px 28px 14px 20px;border-radius:999px;background:var(--coral);color:#26180e;text-decoration:none;cursor:grab;box-shadow:0 8px 22px rgba(255,110,79,.38)}
+a.bm::before{content:"";width:10px;height:16px;background:radial-gradient(circle,rgba(38,24,14,.6) 1.5px,transparent 1.9px) 0 0/5px 5.33px}a.bm:hover{background:var(--coral-h)}a.bm:active{cursor:grabbing}
+a.bm.shake{animation:shake .45s}@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}.clickwarn{font-size:14px;color:var(--err);margin:0}
+.demo{position:relative;min-height:190px;border:1px solid var(--line);border-radius:16px;background:var(--card);overflow:hidden}
+.d-top{height:28px;display:flex;align-items:center;gap:5px;padding:0 10px;background:var(--sunk);border-bottom:1px solid var(--line)}.d-top i{width:8px;height:8px;border-radius:50%;background:var(--line)}.d-url{flex:1;height:14px;margin-left:8px;border-radius:7px;background:var(--card);border:1px solid var(--line)}
+.d-bar{position:relative;height:28px;display:flex;align-items:center;gap:8px;padding:0 10px;border-bottom:1px solid var(--line)}.d-bar i{flex:none;width:44px;height:10px;border-radius:5px;background:var(--line)}
+.d-new{font-size:11px;font-weight:700;line-height:1;padding:4px 8px;border-radius:6px;background:var(--tint);color:var(--accent);white-space:nowrap;opacity:0;animation:d-new 5s infinite}
+.d-caret{position:absolute;left:109px;top:5px;width:2px;height:18px;border-radius:1px;background:var(--coral);opacity:0;animation:d-caret 5s infinite}
+.d-btn,.d-ghost{position:absolute;left:64%;top:112px;transform:translate(-50%,-50%);white-space:nowrap;font-weight:700}
+.d-btn{font-size:12px;padding:7px 14px;border-radius:999px;background:var(--coral);color:#26180e;animation:d-btn 5s infinite}
+.d-ghost{font-size:11px;padding:4px 9px;border-radius:6px;background:var(--card);border:1px solid var(--coral);color:var(--ink);box-shadow:var(--shadow);opacity:0;animation:d-ghost 5s infinite}
+.d-cur{position:absolute;left:86%;top:170px;width:18px;height:22px;margin:-1px 0 0 -1px;opacity:0;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25));animation:d-cur 5s infinite}
+.d-cap{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:12px;color:var(--muted)}
+@keyframes d-cur{0%{left:86%;top:170px;opacity:0}8%{opacity:1}20%,26%{left:64%;top:112px;scale:1}30%{scale:.85}60%{left:152px;top:42px;scale:.85}66%{scale:1}84%{left:152px;top:42px;opacity:1}92%,100%{left:152px;top:42px;opacity:0}}
+@keyframes d-ghost{0%,28%{left:64%;top:112px;opacity:0}32%{opacity:.95}60%{left:152px;top:42px;opacity:.95}64%,100%{left:152px;top:42px;opacity:0}}
+@keyframes d-btn{0%,28%{opacity:1}32%,62%{opacity:.45}70%,100%{opacity:1}}
+@keyframes d-caret{0%,44%{opacity:0}48%,60%{opacity:1}63%,100%{opacity:0}}
+@keyframes d-new{0%,61%{opacity:0;transform:scale(.6)}67%{opacity:1;transform:scale(1.1)}72%,88%{opacity:1;transform:scale(1)}96%,100%{opacity:0}}
+.dropbar{position:fixed;left:50%;top:10px;z-index:10;display:flex;align-items:center;gap:8px;max-width:calc(100% - 32px);padding:10px 18px;border-radius:999px;background:var(--ink);color:var(--bg);font-weight:600;font-size:15px;box-shadow:0 10px 30px rgba(0,0,0,.25);transform:translate(-50%,-160%);opacity:0;visibility:hidden;transition:transform .25s,opacity .25s,visibility .25s;pointer-events:none}
+.dropbar svg{flex:none;width:18px;height:18px}body.dragging .dropbar{transform:translate(-50%,0);opacity:1;visibility:visible}
+details{border-top:1px solid var(--line);margin-top:18px;padding-top:14px}summary{display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;color:var(--accent);list-style:none}summary::-webkit-details-marker{display:none}
+summary::before{content:"";width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);transition:transform .2s}details[open] summary::before{transform:rotate(45deg)}details>div{padding-top:12px}
+.foot{margin-top:28px;text-align:center}
+@media (max-width:480px){h1{font-size:24px}.sec,.card{padding:18px}.logo{height:44px}.when{margin-left:0;width:100%}}
+@media (prefers-reduced-motion:reduce){.demo *,.hint svg,a.bm.shake,.steps>li.next::before{animation:none!important}.d-new{opacity:1}.d-cur,.d-ghost,.d-caret{display:none}}
 `;
 
 function layout(title, body, nonce = "", script = "") {
-  return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex,nofollow"><title>${esc(title)}</title><style>${CSS}</style></head><body><main>${body}</main>${script ? `<script nonce="${nonce}">${script}</script>` : ""}</body></html>`;
+  return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex,nofollow"><title>${esc(title)}</title><link rel="icon" href="${FAVICON}"><style>${CSS}</style></head><body><main><header class="top"><img class="logo" src="${LOGO}" alt="AWDPI 亚裔女性国际发展计划"><span class="tag">公众号文章同步</span></header>${body}</main>${script ? `<script nonce="${nonce}">${script}</script>` : ""}</body></html>`;
 }
 
 function message(title, text) {
   return layout(title, `<h1>${esc(title)}</h1><div class="card"><p>${esc(text)}</p></div><p class="muted">AWDPI 官网 · 公众号文章同步</p>`);
 }
 
-function installPage(endpoint) {
+// The install page only shows how to reach the bookmark bar in the browser it is opened in (from the User-Agent).
+// Browsers built on Chrome under another name (QQ, 360, Sogou, Opera) get the general instructions.
+function browserOf(ua) {
+  const mobile = /iPhone|iPad|iPod|Android|Mobile/i.test(ua);
+  const mac = !mobile && /Macintosh|Mac OS X/.test(ua);
+  const win = !mobile && /Windows/.test(ua);
+  const name = /QQBrowser|MetaSr|360SE|360EE|OPR\/|YaBrowser|UCBrowser/.test(ua) ? ""
+    : /Edg\//.test(ua) ? "edge" : /Firefox\//.test(ua) ? "firefox" : /Chrome\//.test(ua) ? "chrome" : /Safari\//.test(ua) ? "safari" : "";
+  return { mobile, mac, win, name };
+}
+const BROWSERS = { chrome: ["Chrome", "书签栏"], edge: ["Edge", "收藏夹栏"], safari: ["Safari", "个人收藏栏"], firefox: ["Firefox", "书签工具栏"] };
+const keys = (...k) => k.map((x) => `<kbd>${x}</kbd>`).join(" + ");
+const ARROW_UP = `<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 14V2M3 7l5-5 5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+function installPage(endpoint, ua) {
   const code = `javascript:${encodeURIComponent(BOOKMARKLET.replace("__ENDPOINT__", endpoint))}`;
   const nonce = randomBytes(16).toString("base64");
+  const b = browserOf(ua);
+  const [label, bar] = BROWSERS[b.name] || ["", "书签栏"];
+  const mod = b.mac ? "⌘" : "Ctrl";
+  const seen = label && (b.mac || b.win) ? `${b.mac ? "Mac" : "Windows"} 上的 ${label}` : label;
+  const showBar = b.name === "safari" ? `按 ${keys("⌘", "Shift", "B")}，或在屏幕顶部的菜单栏选“显示 → 显示个人收藏栏”。`
+    : b.name ? `按 ${keys(mod, "Shift", "B")}，地址栏下面会出现一行${bar}。${b.name === "firefox" ? "（Firefox 没有测试过，建议改用 Chrome、Edge 或 Safari。）" : ""}`
+    : `Chrome 和 Edge 按 ${keys(mod, "Shift", "B")}；Safari 按 ${keys("⌘", "Shift", "B")}。`;
   const body = `
-<h1>公众号文章同步到官网</h1>
+<section>
+<h1>公众号文章，一键同步到官网</h1>
+<p class="lead">在浏览器里装一个书签。公众号发完文章后，在文章页上点一下这个书签，核对后就能发布到 AWDPI 官网，正文和图片会自动整理好。</p>
 <p class="muted">AWDPI 内部工具，请不要转发这个网址。</p>
-<div class="card">
-<p>公众号发出文章后，用一个浏览器书签把这篇文章同步到 AWDPI 官网。文章正文和图片会保存到网站上，不需要再手动整理。</p>
+</section>
+${b.mobile ? `<div class="note warn"><strong>请在电脑上打开这个页面。</strong>手机和平板上的浏览器装不了这个书签，也读不了公众号文章。</div>` : ""}
+<section class="sec">
+<div class="sec-head"><span class="badge">第一步</span><h2>安装书签</h2><span class="when">每台电脑一次，约 30 秒</span></div>
+<ol class="steps">
+<li>
+<h3>显示${bar}</h3>
+${seen ? `<p class="seen">你现在用的是 ${seen}</p>` : ""}
+<p>${showBar}</p>
+<p class="muted">地址栏下面已经有一行${bar}的，跳过这一步。</p>
+</li>
+<li>
+<h3>把按钮拖到${bar}上</h3>
+<p>按住下面的按钮不放，往上拖到${bar}上，再松开鼠标。</p>
+<div class="dragarea">
+<div class="zone">
+<span class="hint">${ARROW_UP}按住，往上拖</span>
+<a class="bm" id="bm" href="${esc(code)}">同步到官网</a>
+<p class="clickwarn" id="clickwarn" hidden>要按住拖到${bar}上，在这里点它没有用。</p>
 </div>
-<h2>第一步：安装书签（每台电脑只需一次）</h2>
-<ol>
-<li>用电脑上的 Chrome、Edge 或 Safari 打开这个页面。</li>
-<li>显示书签栏：Chrome 和 Edge 按 <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd>（Mac 按 <kbd>⌘</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd>）；Safari 选“显示 → 显示个人收藏栏”。</li>
-<li>用鼠标把下面这个按钮拖到书签栏上（不要在这里点它）：</li>
+<div class="demo" aria-hidden="true">
+<div class="d-top"><i></i><i></i><i></i><span class="d-url"></span></div>
+<div class="d-bar"><i></i><i></i><span class="d-new">同步到官网</span><span class="d-caret"></span></div>
+<span class="d-btn">同步到官网</span><span class="d-ghost">同步到官网</span>
+<svg class="d-cur" viewBox="0 0 18 22"><path d="M1 1v16.5l4.4-4.1 2.9 6.5 2.8-1.2-2.9-6.4H14z" fill="#fff" stroke="#26180e" stroke-width="1.3" stroke-linejoin="round"/></svg>
+<span class="d-cap">演示：拖到${bar}上</span>
+</div>
+</div>
+<p class="muted">以前装过的：先在${bar}上右键旧的“同步到官网”，删掉，再拖新的。</p>
+</li>
+<li id="try">
+<h3>点一下试试</h3>
+<p>点${bar}上刚出现的“同步到官网”。弹出提示“请先在电脑浏览器里打开一篇公众号文章……”，就说明装好了。</p>
+<p class="muted">没有反应的话：确认点的是${bar}上的书签，不是这个页面上的按钮；还是不行，换用 Chrome 或 Edge。</p>
+</li>
 </ol>
-<p><a class="btn bm" href="${esc(code)}">同步到官网</a></p>
-<p class="muted">拖不过去的话：手动新建一个书签，名称填“同步到官网”，网址填下面框里的全部内容。</p>
-<textarea readonly id="code">${esc(code)}</textarea>
-<p><button type="button" id="copy">复制书签网址</button></p>
-<h2>第二步：同步一篇文章</h2>
+<details>
+<summary>拖不动？手动添加书签</summary>
+<div>
 <ol>
-<li>公众号群发后，在电脑上的浏览器里打开这篇文章。可以在电脑微信里打开文章，点右上角的“…”，选“在默认浏览器中打开”；也可以把文章链接复制到浏览器的地址栏。</li>
-<li>等文章完全显示出来，点书签栏里的“同步到官网”。</li>
-<li>在打开的页面上核对标题、日期、封面和分类，选择“原创”或“转载”，点“发布到官网”。每台电脑第一次同步时要输入团队密码；勾选“记住这台电脑”后，一年内在这台电脑上不用再输。</li>
-<li>等页面显示“已发布”。大约 2 分钟后，文章会出现在网站上。</li>
+<li>点下面的“复制书签网址”。</li>
+<li>按 ${keys(mod, "D")} 把这个页面加为书签，位置选${b.name === "safari" ? "“个人收藏”" : `“${bar}”`}。</li>
+<li>在${bar}上右键这个新书签，选“修改”或“编辑”（Safari 是“编辑地址”和“重新命名”），名称改成“同步到官网”，网址换成刚才复制的内容，保存。</li>
 </ol>
+<textarea readonly id="code" aria-label="书签网址">${esc(code)}</textarea>
+<p><button type="button" class="btn2" id="copy">复制书签网址</button></p>
+</div>
+</details>
+<details>
+<summary>其他浏览器怎么显示书签栏</summary>
+<div><dl>
+<dt>Chrome</dt><dd>${keys("Ctrl", "Shift", "B")}，Mac 上 ${keys("⌘", "Shift", "B")}，叫“书签栏”</dd>
+<dt>Edge</dt><dd>${keys("Ctrl", "Shift", "B")}，Mac 上 ${keys("⌘", "Shift", "B")}，叫“收藏夹栏”</dd>
+<dt>Safari</dt><dd>${keys("⌘", "Shift", "B")}，或菜单栏“显示 → 显示个人收藏栏”</dd>
+<dt>手机、平板</dt><dd>用不了，请用电脑</dd>
+</dl></div>
+</details>
+</section>
+<section class="sec">
+<div class="sec-head"><span class="badge">第二步</span><h2>同步一篇文章</h2><span class="when">每次公众号发完文章后</span></div>
+<ol class="steps">
+<li><h3>在电脑浏览器里打开文章</h3><p>在电脑微信里打开这篇公众号文章，点右上角的“…”，选“在默认浏览器中打开”。也可以把文章链接复制到浏览器的地址栏。</p></li>
+<li><h3>点${bar}上的“同步到官网”</h3><p>等文章完全显示出来再点。</p></li>
+<li><h3>核对，然后发布</h3><p>在打开的页面上核对标题、日期、封面和分类，选“原创”或“转载”，点“发布到官网”。</p><p class="muted">每台电脑第一次发布时要输入团队密码；勾选“记住这台电脑”后，一年内不用再输。</p></li>
+<li><h3>等页面显示“已发布”</h3><p>大约 2 分钟后，文章出现在网站上，英文网站上同时有 AI 翻译的英文版。</p></li>
+</ol>
+</section>
+<section class="sec">
 <h2>注意</h2>
 <ul>
 <li>只能同步 AWDPI 公众号自己发的文章。</li>
 <li>转载或改编自别人的文章，要先取得原作者或原公众号的授权。</li>
-<li>文章发出后改过的，可以再同步一次，网站上的那篇会被替换。</li>
+<li>文章发出后改过的，再同步一次，网站上的那篇会被替换。</li>
 <li>文章里的视频和音频不会同步，网站上会显示一个链接，指向公众号原文。</li>
-<li>团队密码请不要发到群里或其他公开的地方。公用电脑上不要勾选“记住这台电脑”。</li>
-</ul>`;
-  const script = `document.getElementById("copy").addEventListener("click",function(){var t=document.getElementById("code");t.select();navigator.clipboard.writeText(t.value).then(function(){document.getElementById("copy").textContent="已复制";},function(){document.execCommand("copy");document.getElementById("copy").textContent="已复制";});});`;
+<li>团队密码请不要发到群里或其他公开的地方；公用电脑上不要勾选“记住这台电脑”。</li>
+</ul>
+</section>
+<p class="muted foot">AWDPI 官网 · 公众号文章同步 · 书签第 ${BOOKMARK_VERSION} 版</p>
+<div class="dropbar" aria-hidden="true">${ARROW_UP}放到地址栏下面的${bar}上，再松开鼠标</div>`;
+  // Clicking the button here does nothing useful (and the page's CSP blocks javascript: links), so say to drag it.
+  const script = `var bm = document.getElementById("bm"), warn = document.getElementById("clickwarn");
+bm.addEventListener("click", function (e) { e.preventDefault(); warn.hidden = false; bm.classList.remove("shake"); void bm.offsetWidth; bm.classList.add("shake"); });
+bm.addEventListener("dragstart", function () { document.body.classList.add("dragging"); warn.hidden = true; });
+bm.addEventListener("dragend", function () { document.body.classList.remove("dragging"); document.getElementById("try").classList.add("next"); });
+document.getElementById("copy").addEventListener("click", function () {
+  var t = document.getElementById("code"), btn = this;
+  t.select();
+  navigator.clipboard.writeText(t.value).then(function () { btn.textContent = "已复制"; }, function () { document.execCommand("copy"); btn.textContent = "已复制"; });
+});`;
   return [layout("公众号文章同步到官网", body, nonce, script), nonce];
 }
 
