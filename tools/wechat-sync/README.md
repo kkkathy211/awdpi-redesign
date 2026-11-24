@@ -71,7 +71,7 @@ cd tools/wechat-sync/aws
 SAM_CLI_TELEMETRY=0 AWS_PROFILE=awdpi sam deploy
 ```
 
-团队密码存在 SSM 参数 `/awdpi/wechat-sync/password`（SecureString）。查看或更换：
+团队密码存在 SSM 参数 `/awdpi/wechat-sync/password`（SecureString）。每台电脑第一次提交时输入一次；勾选"记住这台电脑"后，浏览器保存一个一年有效的签名 Cookie（`awdpi_sync`，HttpOnly、SameSite=Lax），这台电脑上的核对页就不再显示密码框。签名用当前密码生成，所以**更换密码后，所有记住的电脑都要重新输入一次**。在核对页点"不是你自己的电脑？"（`/forget`）可以让某台电脑忘记。查看或更换：
 
 ```bash
 aws ssm get-parameter --profile awdpi --region eu-north-1 --name /awdpi/wechat-sync/password --with-decryption --query Parameter.Value --output text

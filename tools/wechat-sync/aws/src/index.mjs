@@ -4,9 +4,11 @@
 //   POST /submit               team password + original/reprint choice + category; queues the import and starts the workflow
 //   GET  /status/<id>          progress page
 //   GET  /status/<id>/data     progress as JSON (written by the GitHub workflow)
+//   GET  /session              whether this computer is remembered (the form then hides the password field)
+//   GET  /forget               forget this computer
 // The confirm form suggests a category with a model on Bedrock (classify.mjs); the categories are read from
 // data/story_categories.json in the website repository. Article text is never logged. Drafts expire after 2 days, submissions and progress after 90 (bucket lifecycle).
-import { createHash, randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
 import fs from "node:fs";
 import { GetObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { GetParameterCommand, SSMClient } from "@aws-sdk/client-ssm";
@@ -162,6 +164,40 @@ async function checkPassword(given) {
   return timingSafeEqual(h(given), h(expected));
 }
 
+// ---------- remembered computers ----------
+// After the team password is entered once with "记住这台电脑", the browser keeps a signed cookie for a year and the
+// form no longer asks for the password on that computer. The signature is keyed on the current password, so changing
+// the password forgets every computer. SameSite=Lax: another website cannot make the browser submit with the cookie.
+const REMEMBER_COOKIE = "awdpi_sync";
+const REMEMBER_DAYS = 365;
+async function rememberKey() {
+  const pw = await param(PASSWORD_PARAM);
+  return pw ? createHash("sha256").update(`awdpi-sync-remember:${pw}`).digest() : null;
+}
+async function rememberCookie() {
+  const exp = Math.floor(Date.now() / 1000) + REMEMBER_DAYS * 86400;
+  const sig = createHmac("sha256", await rememberKey()).update(String(exp)).digest("base64url");
+  return `${REMEMBER_COOKIE}=${exp}.${sig}; Max-Age=${REMEMBER_DAYS * 86400}; Path=/; Secure; HttpOnly; SameSite=Lax`;
+}
+const FORGET_COOKIE = `${REMEMBER_COOKIE}=; Max-Age=0; Path=/; Secure; HttpOnly; SameSite=Lax`;
+function cookie(event, name) {
+  const all = [...(event.cookies || []), ...String(event.headers?.cookie || "").split(";")];
+  for (const c of all) {
+    const i = c.indexOf("=");
+    if (i > 0 && c.slice(0, i).trim() === name) return c.slice(i + 1).trim();
+  }
+  return "";
+}
+async function remembered(event) {
+  const m = cookie(event, REMEMBER_COOKIE).match(/^(\d+)\.([A-Za-z0-9_-]+)$/);
+  if (!m || Number(m[1]) < Date.now() / 1000) return false;
+  const key = await rememberKey();
+  if (!key) return false;
+  const expected = createHmac("sha256", key).update(m[1]).digest();
+  const given = Buffer.from(m[2], "base64url");
+  return given.length === expected.length && timingSafeEqual(given, expected);
+}
+
 async function dispatch(id) {
   const token = await param(TOKEN_PARAM);
   if (!token) {
@@ -231,6 +267,10 @@ export async function handler(event) {
     if (method === "GET" && path === "/") return html(200, ...installPage(endpoint));
     if (method === "POST" && path === "/capture") return await capture(event);
     if (method === "POST" && path === "/submit") return await submit(event);
+    if (method === "GET" && path === "/session") return json(200, { remembered: await remembered(event) });
+    if (method === "GET" && path === "/forget") {
+      return { ...html(200, message("已经忘记这台电脑", "下次在这台电脑上同步文章时，需要重新输入团队密码。")), cookies: [FORGET_COOKIE] };
+    }
     if (method === "GET" && (m = path.match(/^\/status\/([0-9a-f-]{36})$/)) && UUID.test(m[1])) return html(200, ...statusPage(m[1]));
     if (method === "GET" && (m = path.match(/^\/status\/([0-9a-f-]{36})\/data$/)) && UUID.test(m[1])) {
       return json(200, (await get(`status/${m[1]}.json`)) || { state: "unknown" });
@@ -264,7 +304,7 @@ async function capture(event) {
   const description = cardText(article, suggestion);
   await put(`drafts/${id}.json`, { id, createdAt: new Date().toISOString(), ...derived, suggestion, description, article });
   log("captured", { id, slug: derived.slug, bytes: text.length });
-  return html(200, formPage({ id, article, d: { ...derived, suggestion, description }, already, cats }));
+  return html(200, ...formPage({ id, article, d: { ...derived, suggestion, description }, already, cats }));
 }
 
 async function submit(event) {
@@ -283,10 +323,12 @@ async function submit(event) {
   if (origin === "reprint" && !authorised) errors.push("转载或改编的文章，要先取得原作者或原公众号的授权，再勾选确认。");
   // Without the category list (GitHub unreachable) the article is imported without a category.
   if (cats.length && !cats.some((c) => c.id === category)) errors.push("请选择分类。");
-  if (!(await checkPassword(form.get("password") || ""))) errors.push("团队密码不对。");
+  const known = await remembered(event);
+  const remember = form.get("remember") === "yes";
+  if (!known && !(await checkPassword(form.get("password") || ""))) errors.push("团队密码不对。");
   if (errors.length) {
     log("submit_rejected", { id, count: errors.length });
-    return html(400, formPage({ id, article: draft.article, d: draft, already: null, errors, origin, authorised, category, cats }));
+    return html(400, ...formPage({ id, article: draft.article, d: draft, already: null, errors, origin, authorised, category, cats, remember }));
   }
   const now = new Date().toISOString();
   await put(`inbox/${id}.json`, {
@@ -295,8 +337,10 @@ async function submit(event) {
   });
   const started = await dispatch(id);
   await put(`status/${id}.json`, { state: started ? "queued" : "waiting", title: draft.article.title, url: draft.url, at: now });
-  log("submitted", { id, slug: draft.slug, category, aiCategory: draft.suggestion?.category || null, started });
-  return { statusCode: 303, headers: { Location: `/status/${id}` }, body: "" };
+  log("submitted", { id, slug: draft.slug, category, aiCategory: draft.suggestion?.category || null, started, remembered: known });
+  const done = { statusCode: 303, headers: { Location: `/status/${id}` }, body: "" };
+  if (!known && remember) done.cookies = [await rememberCookie()];
+  return done;
 }
 
 // ---------- pages ----------
@@ -321,7 +365,7 @@ main{max-width:720px;margin:0 auto;padding:32px 16px 64px}h1{font-size:26px;line
 p{margin:0 0 12px}.muted{color:var(--muted);font-size:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin:18px 0}
 .cover{width:100%;aspect-ratio:2.35/1;object-fit:cover;border-radius:10px;background:var(--line);display:block;margin-bottom:14px}
 .title{font-size:20px;font-weight:600;line-height:1.4;margin:0 0 8px}dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:0;font-size:15px}dt{color:var(--muted)}dd{margin:0;overflow-wrap:anywhere}
-.note{border-radius:10px;padding:12px 14px;margin:14px 0;font-size:15px}.warn{background:var(--warn-bg);color:var(--warn)}.err{background:var(--err-bg);color:var(--accent)}
+.note{border-radius:10px;padding:12px 14px;margin:14px 0;font-size:15px}.warn{background:var(--warn-bg);color:var(--warn)}.note.ok{background:var(--bg);border:1px solid var(--line);color:var(--ok)}.err{background:var(--err-bg);color:var(--accent)}
 fieldset{border:0;padding:0;margin:0 0 16px}legend{font-weight:600;margin-bottom:8px}label.opt{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;cursor:pointer}
 label.opt input{margin-top:5px}select,input[type=password]{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
 button,.btn{display:inline-block;font:inherit;font-weight:600;padding:11px 22px;border-radius:999px;border:0;background:var(--accent);color:#fff;cursor:pointer;text-decoration:none}
@@ -360,7 +404,7 @@ function installPage(endpoint) {
 <ol>
 <li>公众号群发后，在电脑上的浏览器里打开这篇文章。可以在电脑微信里打开文章，点右上角的“…”，选“在默认浏览器中打开”；也可以把文章链接复制到浏览器的地址栏。</li>
 <li>等文章完全显示出来，点书签栏里的“同步到官网”。</li>
-<li>在打开的页面上核对标题、日期和封面，选择“原创”或“转载”，输入团队密码，点“发布到官网”。</li>
+<li>在打开的页面上核对标题、日期、封面和分类，选择“原创”或“转载”，点“发布到官网”。每台电脑第一次同步时要输入团队密码；勾选“记住这台电脑”后，一年内在这台电脑上不用再输。</li>
 <li>等页面显示“已发布”。大约 2 分钟后，文章会出现在网站上。</li>
 </ol>
 <h2>注意</h2>
@@ -369,13 +413,14 @@ function installPage(endpoint) {
 <li>转载或改编自别人的文章，要先取得原作者或原公众号的授权。</li>
 <li>文章发出后改过的，可以再同步一次，网站上的那篇会被替换。</li>
 <li>文章里的视频和音频不会同步，网站上会显示一个链接，指向公众号原文。</li>
-<li>团队密码请不要发到群里或其他公开的地方。</li>
+<li>团队密码请不要发到群里或其他公开的地方。公用电脑上不要勾选“记住这台电脑”。</li>
 </ul>`;
   const script = `document.getElementById("copy").addEventListener("click",function(){var t=document.getElementById("code");t.select();navigator.clipboard.writeText(t.value).then(function(){document.getElementById("copy").textContent="已复制";},function(){document.execCommand("copy");document.getElementById("copy").textContent="已复制";});});`;
   return [layout("公众号文章同步到官网", body, nonce, script), nonce];
 }
 
-function formPage({ id, article: a, d, already, errors = [], origin, authorised, category, cats = [] }) {
+function formPage({ id, article: a, d, already, errors = [], origin, authorised, category, cats = [], remember = true }) {
+  const nonce = randomBytes(16).toString("base64");
   const cover = imageUrl(a.cover);
   const chosen = origin || (d.original && !d.hints.length ? "original" : "");
   const ai = d.suggestion;
@@ -413,12 +458,20 @@ ${cats.length ? `<p><label for="cat"><strong>分类</strong></label></p>
 ${cats.map((c) => `<option value="${esc(c.id)}"${c.id === pickedCat ? " selected" : ""}>${esc(c.zh)}</option>`).join("")}
 </select></p>
 <p class="muted">${aiCat ? `${ai.source === "rule" ? "按栏目名自动选好" : "AI 建议"}：${esc(aiCat.zh)}${ai.reason ? `（${esc(ai.reason)}）` : ""}。不对的话请改。` : "请选择这篇文章的分类。"}</p>` : ""}
+<div id="pwbox">
 <p><label for="pw"><strong>团队密码</strong></label></p>
-<p><input type="password" id="pw" name="password" autocomplete="current-password" required></p>
+<p><input type="password" id="pw" name="password" autocomplete="current-password"></p>
+<label class="opt"><input type="checkbox" name="remember" value="yes"${remember ? " checked" : ""}><span>记住这台电脑：一年内在这台电脑上不用再输密码。公用电脑请不要勾选。</span></label>
+</div>
+<p id="known" class="note ok" hidden>这台电脑已经记住，不用输入密码。<a href="/forget">不是你自己的电脑？点这里让它忘记</a></p>
 <p><button type="submit">发布到官网</button></p>
 <p class="muted">提交后不能撤回；需要从网站上删掉的话，请联系网站管理员。</p>
 </form>`;
-  return layout("同步到官网", body);
+  // A remembered computer does not need the password (the cookie itself is not readable from the page).
+  const script = `fetch("/session", { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (s) {
+  if (s.remembered) { document.getElementById("pwbox").hidden = true; document.getElementById("known").hidden = false; }
+}).catch(function () {});`;
+  return [layout("同步到官网", body, nonce, script), nonce];
 }
 
 function statusPage(id) {
