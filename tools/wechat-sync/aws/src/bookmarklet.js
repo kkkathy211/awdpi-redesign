@@ -2,6 +2,8 @@
 // puts the API address in place of __ENDPOINT__ and offers it as a javascript: link.
 // Every statement ends with a semicolon and there are no other comments, so joining the lines is safe.
 // It reads the article that is open in the browser and posts it to the internal form, which opens in the same tab.
+// v is the bookmark version: raise it whenever this file changes, so the form can tell people with an older bookmark
+// to install it again (index.mjs reads the number from here).
 (function () {
   var E = "__ENDPOINT__";
   var c = document.getElementById("js_content");
@@ -25,7 +27,7 @@
   var s = document.querySelector("#js_share_source");
   var q = new URLSearchParams(location.search);
   var data = {
-    v: 1,
+    v: 2,
     url: location.href,
     link: p(w.msg_link, d.link),
     biz: p(w.biz, q.get("__biz"), d.bizuin ? btoa(String(d.bizuin)) : ""),

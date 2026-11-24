@@ -21,8 +21,10 @@ const ALLOWED_BIZ = (process.env.ALLOWED_BIZ || "").split(",").map((s) => s.trim
 const MAX_BODY = 5.5 * 1024 * 1024;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const IMAGE_HOST = /(^|\.)(qpic\.cn|qlogo\.cn)$/i;
-const BOOKMARKLET = fs
-  .readFileSync(new URL("./bookmarklet.js", import.meta.url), "utf8")
+const BOOKMARKLET_SOURCE = fs.readFileSync(new URL("./bookmarklet.js", import.meta.url), "utf8");
+// The version the install page hands out; a capture from an older bookmark gets a notice on the confirm page.
+const BOOKMARK_VERSION = Number((BOOKMARKLET_SOURCE.match(/^\s*v:\s*(\d+),/m) || [])[1] || 1);
+const BOOKMARKLET = BOOKMARKLET_SOURCE
   .split("\n")
   .filter((line) => !/^\s*\/\//.test(line))
   .map((line) => line.trim())
@@ -382,6 +384,7 @@ function formPage({ id, article: a, d, already, errors = [], origin, authorised,
   const body = `
 <h1>同步到官网</h1>
 <p class="muted">核对下面的信息，确认后发布到 AWDPI 官网。</p>
+${Number(a.v) >= BOOKMARK_VERSION ? "" : `<div class="note warn"><strong>请重新安装书签。</strong>你用的是旧版“同步到官网”书签，有些内容可能读不全（例如图片消息的配图）。请打开<a href="/">书签安装页</a>，删掉书签栏上的旧书签，把新的拖上去，然后回到文章页重新点一次书签。</div>`}
 ${errors.map((e) => `<div class="note err">${esc(e)}</div>`).join("")}
 <div class="card">
 ${cover ? `<img class="cover" src="${esc(cover)}" alt="">` : ""}
