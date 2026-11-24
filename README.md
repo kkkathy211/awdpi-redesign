@@ -14,7 +14,8 @@ hugo.toml              网站设置：语言、导航菜单、页脚菜单、pre
 content/
   en/                  英文页面
   zh-cn/               中文页面（和英文同名的文件就是彼此的翻译）
-  stories/             两种语言共用的文章（多数文章只有中文版）
+  stories/             公众号文章的中文原文（两种语言都有，英文网站优先用 stories-en/）
+  stories-en/          这些文章的 AI 英文译文，文件名和原文相同
 data/organisations.toml  四个注册主体的法律信息
 data/donate.toml         捐赠页：各国的开通状态、币种、嵌入的捐赠工具、外部公益平台和项目
 data/partners.toml       关于页的合作伙伴标志（文件在 static/img/partners/）
@@ -88,7 +89,7 @@ image: /media/stories/<名称>/cover.webp
 
 `category` 是分类，取值见 `data/story_categories.json` 里的 `id`；`description` 显示在文章卡片上，也是网页的描述。新闻与故事页的"最新文章"、筛选按钮上的篇数、年份图表和首页的三张文章卡片，都按文章的日期和分类自动生成，不用手改。
 
-文章会同时出现在中英两种语言下。如果某篇文章两种语言内容不同，就分别放进 `content/en/stories/` 和 `content/zh-cn/stories/`。
+文章会同时出现在中英两种语言下：中文网站显示原文；英文网站显示 `content/stories-en/` 里同名的 AI 译文，没有译文的显示原文。译文由 `tools/wechat-sync/translate.mjs` 生成，同步新文章时自动翻译。如果某篇文章两种语言内容不同，就分别放进 `content/en/stories/` 和 `content/zh-cn/stories/`。
 
 同一张图片只存一份。公众号排版里每篇都有的装饰图、二维码等，放在 `static/media/stories/shared/`，文件名是图片内容 SHA-256 的前 16 位，例如 `shared/1a2b3c4d5e6f7a8b.webp`；文章直接引用这一份，不要再复制进文章自己的文件夹。加文章前先算一下图片的 SHA-256：`shared/` 里已有的，直接引用；其他文章的文件夹里已有的，把那份移进 `shared/`（按上面的规则改名），并改掉那篇文章里的引用。GitHub Pages 发布的网站上限是 1 GB，重复的图片会很快把它占满。
 

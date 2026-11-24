@@ -10,10 +10,8 @@
     "import": "node import.mjs"
   },
   "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "3.1164.0",
     "cheerio": "1.2.0",
     "sharp": "0.35.5"
-  },
-  "devDependencies": {
-    "@aws-sdk/client-bedrock-runtime": "3.1164.0"
   }
 }

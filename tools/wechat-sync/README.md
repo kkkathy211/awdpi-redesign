@@ -8,7 +8,7 @@
 内部表单（AWS 斯德哥尔摩，堆栈 awdpi-wechat-sync）
   └─ 编辑核对信息，确认分类（AI 预先选好），选原创或转载，输入团队密码 → 存入 S3，启动 GitHub 工作流
 GitHub 工作流 wechat-import.yml
-  └─ 下载图片并转成 WebP，清理正文，生成 content/stories/<名称>.html，检查网站能生成，提交到 main，发布网站
+  └─ 下载图片并转成 WebP，清理正文，生成 content/stories/<名称>.html，翻译成英文（content/stories-en/），检查网站能生成，提交到 main，发布网站
 ```
 
 编辑看到的使用说明在内部表单的首页上，地址是堆栈输出的 `Endpoint`。
@@ -21,6 +21,7 @@ GitHub 工作流 wechat-import.yml
 | `aws/src/index.mjs` | 内部表单：首页、核对页、提交、进度页 |
 | `aws/src/classify.mjs` | 用 AI 建议分类和卡片介绍（AWS 斯德哥尔摩的 DeepSeek V3.2） |
 | `classify-all.mjs` | 给已有的全部文章分类 |
+| `translate.mjs` | 把文章翻译成英文，放进 `content/stories-en/` |
 | `import-drafts.mjs` | 批量导入：把书签留下的草稿一次导入（补积压的文章用） |
 | `aws/template.yaml` | AWS 资源：HTTP API、Lambda、S3 桶、GitHub 工作流用的角色 |
 | `import.mjs` | 导入程序，由工作流运行 |
@@ -41,6 +42,25 @@ GitHub 工作流 wechat-import.yml
 - 卡片介绍（`description`）：编辑在公众号后台写了摘要的，用摘要；没写的（微信会把正文开头当摘要），用 AI 从正文里原样摘的一两句。AI 摘的句子要在正文里找得到才会用，不会出现 AI 自己写的话。
 - 编辑选了"转载"的，必须勾选已获授权才能提交，文章的 front matter 里会有 `reprint: true`。
 - 已有中英文单独版本（`content/<语言>/stories/`）的文章不会被覆盖，要手动更新。
+
+## 英文版
+
+每篇中文文章都有一份 AI 翻译的英文版，在 `content/stories-en/<同一个文件名>`。`hugo.toml` 先挂载这个文件夹，所以英文网站显示英文版，中文网站显示原文；还没有英文版的文章，英文网站照常显示中文。英文页面顶部会写明"由 AI 从中文翻译"，并链接到中文原文。
+
+- 模型：AWS 斯德哥尔摩的 Qwen3 235B（`qwen.qwen3-235b-a22b-2507-v1:0`）。只翻译含中文的文字，图片、排版、链接不动；标题和卡片介绍也翻译。图片里的文字不翻译。
+- 自动检查：文字分段编号后交给模型，每段都要交回、而且不能还是中文；不合格的段先让 Qwen 重译一次，再交给 DeepSeek V3.2，仍不合格的保留中文并计数。不含中文的段落（空段、表情、数字）不交给模型。
+- 固定译名在 `data/translation_glossary.json`，例如 她视角 = Her Perspective。改了以后，新翻译的文章用新译名；已经翻好的要重译才会改。
+- 同步新文章时，导入工作流会自动翻译这一篇；重新同步的文章会重译。顺便补译最多 20 篇还没有英文版的旧文章。翻译失败不影响导入，英文网站先显示中文，下次导入时补上。
+- 费用：全部约 600 篇约 4 美元，以后每篇不到 1 美分。
+
+手动翻译（管理员，`awdpi` SSO 账号）：
+
+```bash
+AWS_PROFILE=awdpi node translate.mjs ../..                         # 翻译所有还没有英文版的文章
+AWS_PROFILE=awdpi node translate.mjs ../.. --slugs 20261123-3767 --redo   # 重译某几篇（例如改了中文原文或译名）
+```
+
+译文有错的，直接改 `content/stories-en/` 里的文件；但这篇重新同步或用 `--redo` 重译时，手改的内容会被覆盖。
 
 ## 管理
 
@@ -86,7 +106,7 @@ node import-drafts.mjs ../.. 草稿目录 报告.json
 
 已在网站上的会跳过；像是从别的公众号转载的（有"以下文章来源于"卡片，或正文写着转载自）先不导入，列在报告里，确认有授权后在核对页正常提交。导入完生成网站检查一遍，再提交到 main。
 
-从网站上删掉一篇同步过来的文章：删除 `content/stories/<名称>.html` 和 `static/media/stories/<名称>/`，提交到 main。`shared/` 里的图片可能还有其他文章在用，不要删。
+从网站上删掉一篇同步过来的文章：删除 `content/stories/<名称>.html`、它的英文版 `content/stories-en/<名称>.html` 和 `static/media/stories/<名称>/`，提交到 main。`shared/` 里的图片可能还有其他文章在用，不要删。
 
 数据保存：核对前的草稿 2 天后自动删除，提交的文章和进度 90 天后自动删除，都在 S3 桶 `awdpi-wechat-sync-<账号>`（eu-north-1）。日志不记录文章内容和密码，保留 30 天。
 

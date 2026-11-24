@@ -140,7 +140,7 @@ Resources:
           Properties: { ApiId: !Ref Api, Path: '/{proxy+}', Method: ANY }
 
   # The website repository's wechat-import workflow signs in with GitHub's OIDC token (no AWS keys in GitHub).
-  # It can read submissions and read and write progress, nothing else.
+  # It can read submissions, read and write progress, and call the two translation models, nothing else.
   GitHubRole:
     Type: AWS::IAM::Role
     Properties:
@@ -169,6 +169,12 @@ Resources:
               - Effect: Allow
                 Action: [s3:GetObject, s3:PutObject]
                 Resource: !Sub '${Bucket.Arn}/status/*'
+              - Sid: TranslateStories
+                Effect: Allow
+                Action: bedrock:InvokeModel
+                Resource:
+                  - !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/qwen.qwen3-235b-a22b-2507-v1:0
+                  - !Sub arn:aws:bedrock:${AWS::Region}::foundation-model/deepseek.v3.2
 
 Outputs:
   Endpoint:

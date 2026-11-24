@@ -268,6 +268,13 @@ disableKinds = ["taxonomy", "term", "rss"]
   target = "content"
   [module.mounts.sites.matrix]
     languages = ["zh-cn"]
+# English translations of the shared stories (tools/wechat-sync/translate.mjs). Listed first, so for English a
+# translation replaces the Chinese original with the same file name; stories without one stay in Chinese.
+[[module.mounts]]
+  source = "content/stories-en"
+  target = "content/stories"
+  [module.mounts.sites.matrix]
+    languages = ["en"]
 [[module.mounts]]
   source = "content/stories"
   target = "content/stories"

@@ -5,6 +5,10 @@
 {{ partial "legal/hero.html" (dict "title" .Title "crumbs" $crumbs "article" true "lang" $lang) }}
 <div class="lg__body"><div class="wrap lg__in">
 <article class="card art" lang="{{ $lang }}">
+{{- if .Params.translated }}
+{{- $zh := "" }}{{ range .Translations }}{{ if eq .Language.Lang "zh-cn" }}{{ $zh = .RelPermalink }}{{ end }}{{ end }}
+<p class="art__note" lang="en">{{ T "storyTranslated" }}{{ with $zh }} <a href="{{ . }}" hreflang="zh-CN">{{ T "storyOriginal" }}</a>{{ end }}</p>
+{{- end }}
 {{- with .Params.image }}
 <img class="art__cover" src="{{ . | relURL }}" alt="">
 {{- end }}

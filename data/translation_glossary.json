@@ -1,0 +1,19 @@
+{
+  "_readme": "Fixed English names for the AI translation of stories (tools/wechat-sync/translate.mjs). Chinese on the left, English on the right. Add names that must always be translated the same way; the model handles everything else.",
+  "terms": {
+    "AWDPI": "AWDPI",
+    "亚裔女性国际发展计划": "Asian Women Development Plan International (AWDPI)",
+    "Avoice": "Avoice",
+    "海外华人女性保护项目": "Avoice Overseas Chinese Women Protection Project",
+    "她视角": "Her Perspective",
+    "全球机会": "Global Opportunities",
+    "国家办公室": "National Office",
+    "16日行动": "16 Days of Activism",
+    "十六日行动": "16 Days of Activism",
+    "反性别暴力16日行动": "16 Days of Activism against Gender-Based Violence",
+    "联合国妇女署": "UN Women",
+    "联合国妇女地位委员会": "UN Commission on the Status of Women (CSW)",
+    "家暴": "domestic violence",
+    "志愿者": "volunteers"
+  }
+}

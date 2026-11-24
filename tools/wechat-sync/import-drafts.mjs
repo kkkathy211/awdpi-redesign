@@ -8,7 +8,8 @@
 // - articles already on the site (same WeChat id or same name),
 // - articles that look like reprints from another account (they need the editors to confirm permission),
 // - drafts the form rejected (another account's article).
-// Afterwards build the site, look at the report, and commit.
+// The imported articles are then translated into English (translate.mjs). Afterwards build the site, look at the
+// report, and commit.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
@@ -84,6 +85,13 @@ for (const d of list) {
     report.failed.push({ ...entry, why: result.message });
   }
   console.error(`${result.ok ? "ok  " : "FAIL"} ${d.date} ${a.title.slice(0, 40)}`);
+}
+
+// English versions of the imported articles (needs the awdpi AWS profile or other credentials for Bedrock).
+if (!dry && report.imported.length) {
+  const slugs = report.imported.map((x) => x.slug).join(",");
+  const t = spawnSync(process.execPath, [path.join(here, "translate.mjs"), repo, "--slugs", slugs, "--redo", "--concurrency", "8"], { stdio: "inherit" });
+  report.translated = t.status === 0;
 }
 
 // Same title on two different days: probably sent twice; say so in the report.

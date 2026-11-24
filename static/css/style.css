@@ -2102,6 +2102,8 @@ a.net__org:hover .net__go svg { transform: translateX(3px); }
 
 /* The article text comes from WeChat with its own inline styles; only give it sensible defaults. */
 .art { overflow: hidden; padding: clamp(20px, 4vw, 56px) clamp(16px, 4.6vw, 64px); }
+.art__note { margin-bottom: clamp(16px, 2.4vw, 24px); padding: 12px 16px; border-radius: var(--r-sm); background: var(--sunk); color: var(--muted); font-size: 14.5px; line-height: 1.6; }
+.art__note a { color: var(--orange-d); font-weight: 600; }
 .art__cover { width: 100%; margin-bottom: clamp(20px, 3vw, 32px); border-radius: var(--r-sm); }
 .art__body { font-size: 16px; line-height: 1.75; overflow-wrap: anywhere; }
 .art__body img { display: inline-block; max-width: 100%; height: auto; vertical-align: middle; }

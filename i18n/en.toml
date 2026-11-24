@@ -32,9 +32,11 @@ orgsCardGo = "Legal information"
 
 # stories and research
 storiesAll = "All articles"
-storiesAllLead = "Everything we have published since 2021, newest first. Most articles are in Chinese."
+storiesAllLead = "Everything we have published since 2021, newest first. Articles are written in Chinese; the English versions are translated by AI."
 storiesBack = "News and stories"
 storiesYear = "Jump to a year"
+storyTranslated = "Translated from Chinese by AI. It may contain mistakes, and text inside images is not translated."
+storyOriginal = "Read the original in Chinese"
 researchBack = "Research"
 researchDownload = "Download the report"
 researchPublished = "Published"
