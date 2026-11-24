@@ -53,7 +53,9 @@ if (sub.origin === "reprint" && !sub.authorised) fail("转载文章需要先确�
 const wechatId = [a.biz, a.mid, a.idx].every((v) => /^[A-Za-z0-9=_-]+$/.test(String(v || "")))
   ? `${a.biz}-${a.mid}-${a.idx}`
   : "";
-const link = [a.link, a.url].find((u) => /^https:\/\/mp\.weixin\.qq\.com\/[^\s"'<>]*$/.test(u || "")) || "";
+// WeChat sometimes adds a one-off poc_token to the address; it is not part of the article's link.
+const link = ([a.link, a.url].find((u) => /^https:\/\/mp\.weixin\.qq\.com\/[^\s"'<>]*$/.test(u || "")) || "")
+  .replace(/[?&]poc_token=[^&#]*/, "");
 
 // The same WeChat article imported before keeps its address, even if the title or the date changed since.
 let slug = sub.slug;
