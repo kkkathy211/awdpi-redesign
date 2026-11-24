@@ -352,9 +352,8 @@ function installPage(endpoint) {
 <li>显示书签栏：Chrome 和 Edge 按 <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd>（Mac 按 <kbd>⌘</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd>）；Safari 选“显示 → 显示个人收藏栏”。</li>
 <li>用鼠标把下面这个按钮拖到书签栏上（不要在这里点它）：</li>
 </ol>
-<p><a class="btn bm" href="${esc(code)}">📤 同步到官网</a></p>
-<p class="muted">拖不过去的话：手动新建一个书签，名称填“📤 同步到官网”，网址填下面框里的全部内容。浏览器不允许这种书签有自己的图标，所以名字前的 📤 就是它的图标。</p>
-<p class="muted">已经装过旧书签的，不用重拖也能加上图标：在书签栏上右键“同步到官网”，选“修改”，在名称前面加上 📤 即可。</p>
+<p><a class="btn bm" href="${esc(code)}">同步到官网</a></p>
+<p class="muted">拖不过去的话：手动新建一个书签，名称填“同步到官网”，网址填下面框里的全部内容。</p>
 <textarea readonly id="code">${esc(code)}</textarea>
 <p><button type="button" id="copy">复制书签网址</button></p>
 <h2>第二步：同步一篇文章</h2>
