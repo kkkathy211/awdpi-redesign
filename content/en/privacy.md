@@ -56,7 +56,7 @@ AWS acts as our processor under a data processing agreement. Our lawful basis fo
 
 ## BEACON mentoring {#beacon}
 
-BEACON is AWDPI's mentoring programme. It runs as a separate web app, at its own address, where members sign in. AWDPI United Kingdom is the controller of the personal data processed in BEACON. This section explains what BEACON processes; the AWDPI United Kingdom [privacy notice](/uk/privacy/) explains your rights and how to complain.
+BEACON is AWDPI's mentoring programme. It runs as a separate web app at awdpi.org/BEACON, where members sign in, and carries the same notice inside the app. AWDPI United Kingdom is the controller of the personal data processed in BEACON. This section explains what BEACON processes; the AWDPI United Kingdom [privacy notice](/uk/privacy/) explains your rights and how to complain.
 
 ### What we process
 
@@ -88,7 +88,7 @@ Coordinators, the safety lead and administrators are AWDPI staff and volunteers.
 
 ### Where it is stored
 
-All BEACON data is stored by Amazon Web Services (AWS) in its data centre in Stockholm, Sweden. This covers sign-in (Amazon Cognito), the database (Amazon DynamoDB), uploaded documents (Amazon S3, encrypted with our own key) and the e-mails BEACON sends (Amazon SES). The app's pages are delivered worldwide by Amazon CloudFront; the pages themselves contain no personal data.
+All BEACON data is stored by Amazon Web Services (AWS) in its data centre in Stockholm, Sweden. This covers sign-in (Amazon Cognito), the database (Amazon DynamoDB), uploaded documents (Amazon S3, encrypted with our own key) and the e-mails BEACON sends (Amazon SES). BEACON's page files are served by GitHub Pages as part of the awdpi.org website. GitHub is a US company and, as with opening any web page, it processes access information such as your IP address; the page files themselves contain no personal data. What you enter and see in BEACON does not pass through GitHub: it travels directly between your browser and AWS in Stockholm.
 
 AI suggestions use an AI model (DeepSeek) run by AWS in Stockholm. It receives what you write and the work-related parts of your profile and of mentors' profiles: directions, topics, languages, country and city, and the start of what each person wrote about themselves. It never receives names, e-mail addresses or contact details. AWS does not keep these requests, and we have not switched on logging of them.
 

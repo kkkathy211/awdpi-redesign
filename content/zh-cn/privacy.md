@@ -44,7 +44,7 @@ AWS 根据数据处理协议作为我们的处理者。我们运行这个助手�
 
 ## BEACON 导师计划 {#beacon}
 
-BEACON（灯塔计划）是 AWDPI 的导师项目，作为一个独立的网页应用运行，有自己的网址，成员需要登录使用。AWDPI 英国机构是 BEACON 中所处理的个人数据的控制者。本节说明 BEACON 处理哪些信息；您的权利和投诉方式见 AWDPI 英国机构的[隐私声明](/uk/privacy/)（英文）。
+BEACON（灯塔计划）是 AWDPI 的导师项目，作为一个独立的网页应用运行，网址是 awdpi.org/BEACON，成员需要登录使用。BEACON 里也有一份同样内容的隐私说明。AWDPI 英国机构是 BEACON 中所处理的个人数据的控制者。本节说明 BEACON 处理哪些信息；您的权利和投诉方式见 AWDPI 英国机构的[隐私声明](/uk/privacy/)（英文）。
 
 ### 我们处理哪些信息
 
@@ -76,7 +76,7 @@ BEACON（灯塔计划）是 AWDPI 的导师项目，作为一个独立的网页�
 
 ### 存放在哪里
 
-BEACON 的全部数据由亚马逊云（AWS）存放在其瑞典斯德哥尔摩数据中心，包括登录（Amazon Cognito）、数据库（Amazon DynamoDB）、上传的材料（Amazon S3，用我们自己的密钥加密）和 BEACON 发出的邮件（Amazon SES）。应用的页面由 Amazon CloudFront 向全球分发，页面本身不含个人数据。
+BEACON 的全部数据由亚马逊云（AWS）存放在其瑞典斯德哥尔摩数据中心，包括登录（Amazon Cognito）、数据库（Amazon DynamoDB）、上传的材料（Amazon S3，用我们自己的密钥加密）和 BEACON 发出的邮件（Amazon SES）。BEACON 的网页文件由 GitHub Pages 作为 awdpi.org 网站的一部分提供。GitHub 是一家美国公司，和打开任何网页一样，它会处理您的 IP 地址等访问信息；网页文件本身不含个人数据。您在 BEACON 中填写和看到的信息不经过 GitHub，直接在您的浏览器和 AWS 斯德哥尔摩之间传输。
 
 AI 推荐使用 AWS 在斯德哥尔摩运行的 AI 模型（DeepSeek）。模型收到的是您写的内容，以及您和导师资料中与职业有关的部分：方向、话题、语言、国家和城市，以及每个人自我介绍的开头部分。模型永远收不到姓名、邮箱地址或联系方式。AWS 不保留这些请求，我们也没有开启对这些请求的日志记录。
 
