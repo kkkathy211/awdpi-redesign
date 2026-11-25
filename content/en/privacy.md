@@ -9,12 +9,9 @@
 # Kingdom as the website's controller); the UK GDPR Article 9 condition for sensitive information in messages; and
 # a DPIA. Keep it in step with the relay (repository awdp-avoice/avoice-chat-relay).
 # "BEACON mentoring" (added 2026-11-25) describes the platform in repository awdp-avoice/beacon; keep it in step with
-# the code (retention in apps/api/src/store/dynamo.ts and infra/template.yaml). Before launch: (1) decide and build how
-# long match records, meeting notes, goals, check-ins, help and safety requests, reports and free-access applications
-# are kept after a match ends or an account is deleted, then state it under "How long we keep it" (today they are kept
-# while the account is open and are not removed on deletion); (2) add an explicit-consent checkbox to the free-access
-# form for the Article 9(2)(a) wording below; (3) cover BEACON in the DPIA and the Schedule 1 policy document;
-# (4) state BEACON's own address once it has one (beacon.awdpi.org).
+# the code (retention periods in apps/api/src/domain/jobs.ts RETENTION_DAYS, store TTLs in apps/api/src/store/dynamo.ts,
+# bucket lifecycle and log retention in infra/template.yaml). Before launch: (1) cover BEACON in the DPIA and the
+# Schedule 1 policy document; (2) state BEACON's own address once it has one (beacon.awdpi.org).
 title: Privacy
 headTitle: Privacy | AWDPI
 description: "How the AWDPI organisations handle personal information, and how awdpi.org handles information about visitors."
@@ -86,7 +83,7 @@ Coordinators, the safety lead and administrators are AWDPI staff and volunteers.
 
 - **To run the programme you joined:** suggesting mentors, requests, messages, meetings, notifications and e-mail reminders. Our lawful basis is that this is necessary for our agreement with you (UK GDPR Article 6(1)(b)).
 - **To review requests, follow up pairs, prevent misuse, keep members safe and keep a record of staff actions.** Our lawful basis is our legitimate interest in running a safe programme (Article 6(1)(f)).
-- **Sensitive information.** If a help request or a safety request includes information about your health, sex life or other special category data, we use it to keep you and others safe (Data Protection Act 2018, Schedule 1, paragraph 18, safeguarding of individuals at risk). If a free-access application includes such information, for example about a disability, we use it with your explicit consent (Article 9(2)(a)), which you can withdraw by asking us to delete the application.
+- **Sensitive information.** If a help request or a safety request includes information about your health, sex life or other special category data, we use it to keep you and others safe (Data Protection Act 2018, Schedule 1, paragraph 18, safeguarding of individuals at risk). If a free-access application includes such information, for example about a disability, we use it with your explicit consent (Article 9(2)(a)), which you give by ticking the consent box in the form. You can withdraw it at any time in BEACON; the application and its document are then deleted at once.
 - **AI suggestions are only suggestions.** You decide whom to ask, and every request is answered by a person, so no decision about you is made solely by automated means.
 
 ### Where it is stored
@@ -102,13 +99,16 @@ AWS acts as our processor under a data processing agreement.
 - **One-time sign-in codes:** 5 minutes.
 - **Chapter verification codes:** 15 minutes.
 - **Notifications:** 180 days.
+- **Requests that never became a match** (declined, withdrawn, expired or sent back for more detail): 180 days after they closed.
+- **Matches**, with their messages, meeting notes, goals and check-ins: 2 years after the match ends or is completed.
+- **Help requests:** 2 years after they were made, once resolved. **Safety requests and reports:** 3 years after they were made, once closed, to protect people at risk.
+- **Free-access documents:** deleted 30 days after the decision on your application; a document uploaded without an application being sent is deleted after 60 days. **The application itself:** 1 year after the decision.
 - **The log of staff actions:** 2 years.
-- **Free-access documents:** deleted 30 days after the decision on your application. A document uploaded without an application being sent is deleted after 60 days.
 - **Technical logs**, which record requests but not what they contain: 14 days.
 - **Database backups:** up to 35 days.
-- **Everything else:** while your account is open.
+- **Your profile, contact details and settings:** while your account is open.
 
-You can download your data at any time in BEACON under Me, then Settings. When you delete your account, we delete your profile, contact details, settings and sign-in straight away and end your active matches. Messages you sent stay with the person you wrote to, shown as coming from a deleted account, because they are part of that person's conversation.
+You can download your data at any time in BEACON under Me, then Settings. When you delete your account, we delete straight away your profile, contact details, settings, sign-in and notifications, your help requests, your free-access applications and documents, your check-ins, and any request that never became a match. In matches that ran, the conversation, meeting notes and goals stay with the other person, shown as coming from a deleted account, because they are that person's record too; they are deleted on the schedule above. Safety requests and reports you made are kept without your name until their period ends, to protect people at risk.
 
 ### On your device
 
