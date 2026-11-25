@@ -13,11 +13,11 @@ description: "How AWDPI United Kingdom collects, uses and protects personal data
 type: legal
 layout: privacy
 org: uk
-lastUpdated: "2026-11-15"
+lastUpdated: "2026-11-25"
 ---
 This privacy notice explains how **{{< org uk legalName >}}** ("AWDPI United Kingdom", "we" or "us") collects and uses personal data about people who ask us for support, donate, volunteer, work with us or contact us, and the rights you have. We are the controller of this personal data under the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018.
 
-We also run awdpi.org for the AWDPI network. How the website handles information about visitors is explained on our [Privacy](/privacy/) page.
+We also run awdpi.org for the AWDPI network. How the website handles information about visitors is explained on our [Privacy](/privacy/) page. We also run BEACON, AWDPI's mentoring programme; how BEACON handles members' personal data is explained in the [BEACON section](/privacy/#beacon) of the same page.
 
 ## Who we are
 
