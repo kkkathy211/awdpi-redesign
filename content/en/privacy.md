@@ -65,16 +65,16 @@ BEACON is AWDPI's mentoring programme. It runs as a separate web app at awdpi.or
 - **Contact details** you add, such as WeChat, LinkedIn or a contact e-mail address. They are shown to someone you are matched with only after you both agree to exchange them.
 - **Your mentoring:** requests you send or receive, messages between you and your match, meetings you book or record and their notes, shared goals, and the short check-ins you send to your coordinator.
 - **Help and safety:** requests for help, reports about other members, and "I feel unsafe" requests, with anything you write in them.
-- **Free access:** if you apply for priority on pro bono places, the category you choose, your short statement, and either a document you upload or the name and contact details of someone who can confirm your situation.
+- **Free access:** if you apply for priority on pro bono places, the category you choose (which can be "prefer not to say") and any short note you add. We do not ask for or accept any documents.
 - **AI suggestions:** if you ask for suggestions by describing what you need, what you write.
-- **Records of use:** the notifications we show or send you, and a log of staff actions, such as approving a request, opening a free-access document or opening a pair's messages.
+- **Records of use:** the notifications we show or send you, and a log of staff actions, such as approving a request, reviewing a free-access application or opening a pair's messages.
 
 ### Who can see it
 
 - Other members see your profile, within the visibility you choose: your chapter or the whole network. They never see your e-mail address, and they see your contact details only if you agree to exchange them.
 - Only you and your match can read your messages and meeting notes.
 - Coordinators see the requests and matches in the chapters or countries they look after, as status, dates and counts, and the check-ins and help requests sent to them. They cannot read your messages or meeting notes.
-- Mentors see that a mentee holds a pro bono place, never the reason or the evidence. Only BEACON administrators review free-access applications, and each time one of them opens a document, it is logged.
+- Neither mentors nor coordinators learn which mentees use a pro bono place. Only the BEACON administrators who review free-access applications can see them.
 - The safety lead or an administrator can read a pair's messages only while handling an "I feel unsafe" request about that match, and only after writing down why. This is logged.
 
 Coordinators, the safety lead and administrators are AWDPI staff and volunteers. Some of them live outside the United Kingdom.
@@ -83,12 +83,12 @@ Coordinators, the safety lead and administrators are AWDPI staff and volunteers.
 
 - **To run the programme you joined:** suggesting mentors, requests, messages, meetings, notifications and e-mail reminders. Our lawful basis is that this is necessary for our agreement with you (UK GDPR Article 6(1)(b)).
 - **To review requests, follow up pairs, prevent misuse, keep members safe and keep a record of staff actions.** Our lawful basis is our legitimate interest in running a safe programme (Article 6(1)(f)).
-- **Sensitive information.** If a help request or a safety request includes information about your health, sex life or other special category data, we use it to keep you and others safe (Data Protection Act 2018, Schedule 1, paragraph 18, safeguarding of individuals at risk). If a free-access application includes such information, for example about a disability, we use it with your explicit consent (Article 9(2)(a)), which you give by ticking the consent box in the form. You can withdraw it at any time in BEACON; the application and its document are then deleted from BEACON at once (copies in database backups are overwritten within 35 days).
+- **Sensitive information.** If a help request or a safety request includes information about your health, sex life or other special category data, we use it to keep you and others safe (Data Protection Act 2018, Schedule 1, paragraph 18, safeguarding of individuals at risk). If a free-access application reveals such information, for example by choosing the disability category, we use it with your explicit consent (Article 9(2)(a)), which you give by ticking the consent box in the form. You can withdraw it at any time in BEACON; the application is then deleted from BEACON at once (copies in database backups are overwritten within 35 days).
 - **AI suggestions are only suggestions.** You decide whom to ask, and every request is answered by a person, so no decision about you is made solely by automated means.
 
 ### Where it is stored
 
-All BEACON data is stored by Amazon Web Services (AWS) in its data centre in Stockholm, Sweden. This covers sign-in (Amazon Cognito), the database (Amazon DynamoDB), uploaded documents (Amazon S3, encrypted with our own key) and the e-mails BEACON sends (Amazon SES). BEACON's page files are served by GitHub Pages as part of the awdpi.org website. GitHub is a US company and, as with opening any web page, it processes access information such as your IP address; the page files themselves contain no personal data. What you enter and see in BEACON does not pass through GitHub: it travels directly between your browser and AWS in Stockholm.
+All BEACON data is stored by Amazon Web Services (AWS) in its data centre in Stockholm, Sweden. This covers sign-in (Amazon Cognito), the database (Amazon DynamoDB) and the e-mails BEACON sends (Amazon SES). BEACON's page files are served by GitHub Pages as part of the awdpi.org website. GitHub is a US company and, as with opening any web page, it processes access information such as your IP address; the page files themselves contain no personal data. What you enter and see in BEACON does not pass through GitHub: it travels directly between your browser and AWS in Stockholm.
 
 AI suggestions use an AI model (DeepSeek) run by AWS in Stockholm. It receives what you write and the work-related parts of your profile and of mentors' profiles: directions, topics, languages, country and city, and the start of what each person wrote about themselves. It never receives names, e-mail addresses or contact details. AWS does not keep these requests, and we have not switched on logging of them.
 
@@ -102,13 +102,13 @@ AWS acts as our processor under a data processing agreement.
 - **Requests that never became a match** (declined, withdrawn, expired or sent back for more detail): 180 days after they closed.
 - **Matches**, with their messages, meeting notes, goals and check-ins: 2 years after the match ends or is completed.
 - **Help requests:** 2 years after they were made, once resolved. **Safety requests and reports:** 3 years after they were made, once closed, to protect people at risk.
-- **Free-access documents:** deleted 30 days after the decision on your application; a document uploaded without an application being sent is deleted after 60 days. **The application itself:** 1 year after the decision.
+- **Free-access applications:** 1 year after the decision.
 - **The log of staff actions:** 2 years.
 - **Technical logs**, which record requests but not what they contain: 14 days.
 - **Database backups:** up to 35 days.
 - **Your profile, contact details and settings:** while your account is open.
 
-You can download your data at any time in BEACON under Me, then Settings. When you delete your account, we delete straight away your profile, contact details, settings, sign-in and notifications, your help requests, your free-access applications and documents, your check-ins, and any request that never became a match. Copies in database backups are overwritten within 35 days and until then are used only to recover from a system failure. In matches that ran, the conversation, meeting notes and goals stay with the other person, shown as coming from a deleted account, because they are that person's record too; they are deleted on the schedule above. Safety requests and reports you made are kept without your name until their period ends, to protect people at risk.
+You can download your data at any time in BEACON under Me, then Settings. When you delete your account, we delete straight away your profile, contact details, settings, sign-in and notifications, your help requests, your free-access applications, your check-ins, and any request that never became a match. Copies in database backups are overwritten within 35 days and until then are used only to recover from a system failure. In matches that ran, the conversation, meeting notes and goals stay with the other person, shown as coming from a deleted account, because they are that person's record too; they are deleted on the schedule above. Safety requests and reports you made are kept without your name until their period ends, to protect people at risk.
 
 ### On your device
 
